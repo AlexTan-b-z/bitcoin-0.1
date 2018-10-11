@@ -846,7 +846,7 @@ public:
     int nVersion; // 块的版本，主要为了后续的升级使用
     uint256 hashPrevBlock; // 前一个块对应的hash
     uint256 hashMerkleRoot; // 默克尔对应的根
-	// 取前11个区块对应的创建时间平均值
+	// 取前11个区块对应的创建时间中位数
     unsigned int nTime; // 单位为秒，取区块链中对应的前多少个区块对应时间的中位数，如果不存在前一个则去当前时间
     unsigned int nBits; // 记录本区块难度
     unsigned int nNonce; // 工作量证明获得随机数，这个随机数正好满足当前挖矿对应的难度
@@ -918,9 +918,9 @@ public:
                 vMerkleTree.push_back(Hash(BEGIN(vMerkleTree[j+i]),  END(vMerkleTree[j+i]),
                                            BEGIN(vMerkleTree[j+i2]), END(vMerkleTree[j+i2])));
             }
-            j += nSize;
+            j += nSize; // 树的上一层级
         }
-        return (vMerkleTree.empty() ? 0 : vMerkleTree.back());
+        return (vMerkleTree.empty() ? 0 : vMerkleTree.back()); //返回vMerkleTree[-1]，即Merkleroot
     }
 	// 根据交易对应的索引获得交易对应的默克尔分支
     vector<uint256> GetMerkleBranch(int nIndex) const
@@ -931,10 +931,10 @@ public:
         int j = 0;
         for (int nSize = vtx.size(); nSize > 1; nSize = (nSize + 1) / 2)
         {
-            int i = min(nIndex^1, nSize-1);
+            int i = min(nIndex^1, nSize-1); // nindex^1是异或操作，取邻节点
             vMerkleBranch.push_back(vMerkleTree[j+i]);
-            nIndex >>= 1;
-            j += nSize;
+            nIndex >>= 1; // 右移一位，除以二
+            j += nSize; // 树的上一层级
         }
         return vMerkleBranch;
     }

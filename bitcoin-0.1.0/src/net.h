@@ -453,7 +453,7 @@ public:
     bool fNetworkNode; // 设置对应的节点为网络节点，是因为从对应的本地节点列表中没有查询到
     bool fDisconnect; // 端口链接的标记
 protected:
-    int nRefCount; // 使用技术器
+    int nRefCount; // 使用计数器
 public:
     int64 nReleaseTime; // 节点释放的时间
     map<uint256, CRequestTracker> mapRequests;
@@ -464,6 +464,7 @@ public:
     set<CAddress> setAddrKnown; // 已知地址的集合
 
     // inventory based relay  基于转播的库存：库存消息的命令为inv
+    // 用于告知其他节点本节点拥有的对象或请求的数据
     set<CInv> setInventoryKnown; // 已知库存的集合
     set<CInv> setInventoryKnown2;
     vector<CInv> vInventoryToSend; //库存准备发送的集合，对库存准备发送的集合根据已知库存的集合进行过滤之后在发送

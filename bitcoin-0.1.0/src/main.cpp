@@ -28,7 +28,7 @@ uint256 hashBestChain = 0; // 最长链最后一个区块对应的hash
 CBlockIndex* pindexBest = NULL; // 记录当前最长链主链对应的区块索引指针
 
 map<uint256, CBlock*> mapOrphanBlocks; // 孤儿块map
-multimap<uint256, CBlock*> mapOrphanBlocksByPrev;
+multimap<uint256, CBlock*> mapOrphanBlocksByPrev; // 孤儿块的父区快（未接收到的）
 
 map<uint256, CDataStream*> mapOrphanTransactions;// 孤儿交易，其中key对应的交易hash值
 multimap<uint256, CDataStream*> mapOrphanTransactionsByPrev; // 其中key为value交易对应输入的交易的hash值，value为当前交易
@@ -1031,7 +1031,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
 }
 
 
-// 重新组织区块的索引：因为此时已经出现区块链分叉
+// 重新确定主链，因为收到的分叉链高度大于当前节点认为的主链
 bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
 {
     printf("*** REORGANIZE ***\n");
@@ -1748,7 +1748,7 @@ bool ProcessMessages(CNode* pfrom)
 		// 读取消息头
         // Read header
         CMessageHeader hdr;
-        vRecv >> hdr; // 指针已经偏移了
+        vRecv >> hdr;
         if (!hdr.IsValid())
         {
             printf("\n\nPROCESSMESSAGE: ERRORS IN HEADER %s\n\n\n", hdr.GetCommand().c_str());
@@ -1857,7 +1857,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         return false;
     }
 
-	// 地址消息
+	// 接收地址，并广播地址
     else if (strCommand == "addr")
     {
         vector<CAddress> vAddr;
@@ -2070,7 +2070,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             mapAlreadyAskedFor.erase(inv);
     }
 
-
+	// 获取节点的所有已知地址
     else if (strCommand == "getaddr")
     {
         pfrom->vAddrToSend.clear();
@@ -2550,9 +2550,9 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // 选出符合这
 
     // List of values less than target
     int64 nLowestLarger = _I64_MAX;
-    CWalletTx* pcoinLowestLarger = NULL;
-    vector<pair<int64, CWalletTx*> > vValue;
-    int64 nTotalLower = 0;
+    CWalletTx* pcoinLowestLarger = NULL; // 大于目标值且最接近目标值的交易
+    vector<pair<int64, CWalletTx*> > vValue; // 小交易（数额小于目标值）的组合，key为数额，value为交易
+    int64 nTotalLower = 0; // 小交易的数额总和
 
     CRITICAL_BLOCK(cs_mapWallet)
     {
@@ -2592,8 +2592,8 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // 选出符合这
 
     // Solve subset sum by stochastic approximation
     sort(vValue.rbegin(), vValue.rend());
-    vector<char> vfIncluded;
-    vector<char> vfBest(vValue.size(), true);
+    vector<char> vfIncluded; // 选取出来的小交易（数额小于目标值的交易）组合
+    vector<char> vfBest(vValue.size(), true); // 最合适的小交易组合
     int64 nBest = nTotalLower;
 
     for (int nRep = 0; nRep < 1000 && nBest != nTargetValue; nRep++)
@@ -2601,6 +2601,7 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // 选出符合这
         vfIncluded.assign(vValue.size(), false);
         int64 nTotal = 0;
         bool fReachedTarget = false;
+		// 第一次循环随机取，如果没达到目标值则进行第二次循环取剩下的交易
         for (int nPass = 0; nPass < 2 && !fReachedTarget; nPass++)
         {
             for (int i = 0; i < vValue.size(); i++)
@@ -2609,7 +2610,7 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // 选出符合这
                 {
                     nTotal += vValue[i].first;
                     vfIncluded[i] = true;
-                    if (nTotal >= nTargetValue)
+                    if (nTotal >= nTargetValue) // 最后一笔交易的数额加上刚好达到目标值时，则挑选出最小（最接近目标值）的交易
                     {
                         fReachedTarget = true;
                         if (nTotal < nBest)
@@ -2626,6 +2627,8 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // 选出符合这
     }
 
     // If the next larger is still closer, return it
+    // 如果pcoinLowestLarger这个交易(比目标值大且最接近目标值的交易)的值相对
+    // 组合的小交易的值的和更接近目标值，则返回这个交易。反之返回小交易（数额小于目标值的交易）
     if (pcoinLowestLarger && nLowestLarger - nTargetValue <= nBest - nTargetValue)
         setCoinsRet.insert(pcoinLowestLarger);
     else

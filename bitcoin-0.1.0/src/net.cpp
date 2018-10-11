@@ -467,7 +467,7 @@ void ThreadSocketHandler2(void* parg)
                 }
             }
 
-			// 删除端口的链接的节点：删除的条件是对应节点的引用小于等于0
+			// 删除端口的连接的节点：删除的条件是对应节点的引用小于等于0
             // Delete disconnected nodes
             list<CNode*> vNodesDisconnectedCopy = vNodesDisconnected;
             foreach(CNode* pnode, vNodesDisconnectedCopy)
@@ -557,14 +557,14 @@ void ThreadSocketHandler2(void* parg)
         //printf("\n");
 
 
-        // 如果fdsetRecv中有监听socket，则接收改监听socket对应的链接请求，并将链接请求设置为新的节点
+        // 如果fdsetRecv中有监听socket，则接收改监听socket对应的连接请求，并将链接请求设置为新的节点
         // Accept new connections
         // 判断发送缓冲区中是否有对应的socket，如果有则接收新的交易
         if (FD_ISSET(hListenSocket, &fdsetRecv))
         {
             struct sockaddr_in sockaddr;
             int len = sizeof(sockaddr);
-            SOCKET hSocket = accept(hListenSocket, (struct sockaddr*)&sockaddr, &len); // 接收socket链接
+            SOCKET hSocket = accept(hListenSocket, (struct sockaddr*)&sockaddr, &len); // 接收socket连接
             CAddress addr(sockaddr);
             if (hSocket == INVALID_SOCKET)
             {
@@ -574,7 +574,7 @@ void ThreadSocketHandler2(void* parg)
             else
             {
                 printf("accepted connection from %s\n", addr.ToString().c_str());
-                CNode* pnode = new CNode(hSocket, addr, true); // 有新的socket链接，则新建对应的节点，并将节点在加入本地节点列表中
+                CNode* pnode = new CNode(hSocket, addr, true); // 有新的socket连接，则新建对应的节点，并将节点在加入本地节点列表中
                 pnode->AddRef();
                 CRITICAL_BLOCK(cs_vNodes)
                     vNodes.push_back(pnode);
