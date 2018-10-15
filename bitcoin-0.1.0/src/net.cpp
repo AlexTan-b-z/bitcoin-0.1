@@ -19,25 +19,25 @@ void ThreadOpenConnections2(void* parg);
 //
 bool fClient = false;
 uint64 nLocalServices = (fClient ? 0 : NODE_NETWORK);
-CAddress addrLocalHost(0, DEFAULT_PORT, nLocalServices);// ±¾µØÖ÷»úµØÖ·
+CAddress addrLocalHost(0, DEFAULT_PORT, nLocalServices);// æœ¬åœ°ä¸»æœºåœ°å€
 CNode nodeLocalHost(INVALID_SOCKET, CAddress("127.0.0.1", nLocalServices));
-CNode* pnodeLocalHost = &nodeLocalHost; // ±¾µØ½Úµã
-bool fShutdown = false; // ±ê¼ÇÊÇ·ñ¹Ø±Õ
-boost::array<bool, 10> vfThreadRunning; // Ïß³ÌÔËĞĞ×´Ì¬±ê¼Ç£¬0Ë÷Òı±íÊ¾sockethandler£¬1Ë÷Òı±íÊ¾openConnection£¬2Ë÷Òı±íÊ¾´¦ÀíÏûÏ¢
-vector<CNode*> vNodes; // Óëµ±Ç°½ÚµãÏàÁ¬µÄ½ÚµãÁĞ±í
+CNode* pnodeLocalHost = &nodeLocalHost; // æœ¬åœ°èŠ‚ç‚¹
+bool fShutdown = false; // æ ‡è®°æ˜¯å¦å…³é—­
+boost::array<bool, 10> vfThreadRunning; // çº¿ç¨‹è¿è¡ŒçŠ¶æ€æ ‡è®°ï¼Œ0ç´¢å¼•è¡¨ç¤ºsockethandlerï¼Œ1ç´¢å¼•è¡¨ç¤ºopenConnectionï¼Œ2ç´¢å¼•è¡¨ç¤ºå¤„ç†æ¶ˆæ¯
+vector<CNode*> vNodes; // ä¸å½“å‰èŠ‚ç‚¹ç›¸è¿çš„èŠ‚ç‚¹åˆ—è¡¨
 CCriticalSection cs_vNodes;
-map<vector<unsigned char>, CAddress> mapAddresses; // ½ÚµãµØÖ·Ó³Éä£ºkey¶ÔÓ¦µÄÊÇipµØÖ·+¶Ë¿Ú£¬valueÊÇCAddress¶ÔÏó
+map<vector<unsigned char>, CAddress> mapAddresses; // èŠ‚ç‚¹åœ°å€æ˜ å°„ï¼škeyå¯¹åº”çš„æ˜¯ipåœ°å€+ç«¯å£ï¼Œvalueæ˜¯CAddresså¯¹è±¡
 CCriticalSection cs_mapAddresses;
-map<CInv, CDataStream> mapRelay; // ÖØĞÂ×ª²¥µÄÄÚÈİ
-deque<pair<int64, CInv> > vRelayExpiration; // ÖØ²¥¹ıÆÚ¼ÇÂ¼
+map<CInv, CDataStream> mapRelay; // éœ€è¦è½¬æ’­çš„å†…å®¹
+deque<pair<int64, CInv> > vRelayExpiration; // é‡æ’­è¿‡æœŸè®°å½•
 CCriticalSection cs_mapRelay;
-map<CInv, int64> mapAlreadyAskedFor; // ÒÑ¾­ÇëÇó¹ıµÄÇëÇó£º¶ÔÓ¦µÄvalueÎªÇëÇóÊ±¼ä£¨µ¥Î»µ½Î¢Ãë£©
+map<CInv, int64> mapAlreadyAskedFor; // å·²ç»è¯·æ±‚è¿‡çš„è¯·æ±‚ï¼šå¯¹åº”çš„valueä¸ºè¯·æ±‚æ—¶é—´ï¼ˆå•ä½åˆ°å¾®ç§’ï¼‰
 
 
 
-CAddress addrProxy; // ´úÀíµØÖ·
+CAddress addrProxy; // ä»£ç†åœ°å€
 
-//socket Á¬½Ó£¬¸ù¾İµØÖ·ĞÅÏ¢´´½¨¶ÔÓ¦µÄsocketĞÅÏ¢
+//socket è¿æ¥ï¼Œæ ¹æ®åœ°å€ä¿¡æ¯åˆ›å»ºå¯¹åº”çš„socketä¿¡æ¯
 bool ConnectSocket(const CAddress& addrConnect, SOCKET& hSocketRet)
 {
     hSocketRet = INVALID_SOCKET;
@@ -45,25 +45,25 @@ bool ConnectSocket(const CAddress& addrConnect, SOCKET& hSocketRet)
     SOCKET hSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (hSocket == INVALID_SOCKET)
         return false;
-	// ÅĞ¶ÏÊÇ·ñÄÜ¹»Â·ÓÉ£ºÌõ¼şÊÇipµØÖ·¶ÔÓ¦µÄÊÇ10.x.x.x»òÕß¶ÔÓ¦µÄÊÇ192.168.x.x¶¼²»ÄÜ½øĞĞÂ·ÓÉ
+	// åˆ¤æ–­æ˜¯å¦èƒ½å¤Ÿè·¯ç”±ï¼šæ¡ä»¶æ˜¯ipåœ°å€å¯¹åº”çš„æ˜¯10.x.x.xæˆ–è€…å¯¹åº”çš„æ˜¯192.168.x.xéƒ½ä¸èƒ½è¿›è¡Œè·¯ç”±
     bool fRoutable = !(addrConnect.GetByte(3) == 10 || (addrConnect.GetByte(3) == 192 && addrConnect.GetByte(2) == 168));
-    // ´úÀí±ê¼Ç£º²»ÄÜ¹»Â·ÓÉ¿Ï¶¨²»ÄÜ¹»´úÀí£¬ÄÜ¹»Â·ÓÉ»¹Òª¿´¶ÔÓ¦µÄipµØÖ·²»ÄÜÊÇÈ«0
+    // ä»£ç†æ ‡è®°ï¼šä¸èƒ½å¤Ÿè·¯ç”±è‚¯å®šä¸èƒ½å¤Ÿä»£ç†ï¼Œèƒ½å¤Ÿè·¯ç”±è¿˜è¦çœ‹å¯¹åº”çš„ipåœ°å€ä¸èƒ½æ˜¯å…¨0
 	bool fProxy = (addrProxy.ip && fRoutable);
-	// ÄÜ¹»´úÀí¾ÍÊ¹ÓÃ´úÀíµØÖ·£¬²»ÄÜ´úÀí¾ÍÊÇÁ¬½ÓµØÖ·
+	// èƒ½å¤Ÿä»£ç†å°±ä½¿ç”¨ä»£ç†åœ°å€ï¼Œä¸èƒ½ä»£ç†å°±æ˜¯è¿æ¥åœ°å€
     struct sockaddr_in sockaddr = (fProxy ? addrProxy.GetSockAddr() : addrConnect.GetSockAddr());
-	// ¶ÔÓ¦Ö¸¶¨µÄµØÖ·½øĞĞsocketÁ¬½Ó£¬²¢·µ»Ø¶ÔÓ¦µÄsocket¾ä±ú
+	// å¯¹åº”æŒ‡å®šçš„åœ°å€è¿›è¡Œsocketè¿æ¥ï¼Œå¹¶è¿”å›å¯¹åº”çš„socketå¥æŸ„
     if (connect(hSocket, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) == SOCKET_ERROR)
     {
         closesocket(hSocket);
         return false;
     }
-	// Èç¹ûÄÜ¹»´úÀí£¬ÔòÉÏÃæÁ¬½ÓµØÖ··µ»ØµÄsocket¾ä±ú¾ÍÊÇ´úÀíµØÖ·¶ÔÓ¦µÄ¾ä±ú£¬²»ÊÇÁ¬½ÓµØÖ·¶ÔÓ¦µÄ¾ä±ú
+	// å¦‚æœèƒ½å¤Ÿä»£ç†ï¼Œåˆ™ä¸Šé¢è¿æ¥åœ°å€è¿”å›çš„socketå¥æŸ„å°±æ˜¯ä»£ç†åœ°å€å¯¹åº”çš„å¥æŸ„ï¼Œä¸æ˜¯è¿æ¥åœ°å€å¯¹åº”çš„å¥æŸ„
     if (fProxy)
     {
         printf("Proxy connecting to %s\n", addrConnect.ToString().c_str());
         char pszSocks4IP[] = "\4\1\0\0\0\0\0\0user";
-        memcpy(pszSocks4IP + 2, &addrConnect.port, 2); // ÉèÖÃpszSocks4IPÎª"\4\1port\0\0\0\0\0user"
-        memcpy(pszSocks4IP + 4, &addrConnect.ip, 4);// ÉèÖÃpszSocks4IPÎª"\4\1port+ip\0user"
+        memcpy(pszSocks4IP + 2, &addrConnect.port, 2); // è®¾ç½®pszSocks4IPä¸º"\4\1port\0\0\0\0\0user"
+        memcpy(pszSocks4IP + 4, &addrConnect.ip, 4);// è®¾ç½®pszSocks4IPä¸º"\4\1port+ip\0user"
         char* pszSocks4 = pszSocks4IP;
         int nSize = sizeof(pszSocks4IP);
 
@@ -91,7 +91,7 @@ bool ConnectSocket(const CAddress& addrConnect, SOCKET& hSocketRet)
     return true;
 }
 
-// »ñÈ¡ÍâÍøip
+// è·å–å¤–ç½‘ip
 bool GetMyExternalIP(unsigned int& ipRet)
 {
     CAddress addrConnect("72.233.89.199:80"); // whatismyip.com 198-200
@@ -99,7 +99,7 @@ bool GetMyExternalIP(unsigned int& ipRet)
     SOCKET hSocket;
     if (!ConnectSocket(addrConnect, hSocket))
         return error("GetMyExternalIP() : connection to %s failed\n", addrConnect.ToString().c_str());
-	// Ä£ÄâhttpÇëÇó£¬Ïòwhatismyip.com·¢ËÍ
+	// æ¨¡æ‹Ÿhttpè¯·æ±‚ï¼Œå‘whatismyip.comå‘é€
     char* pszGet =
         "GET /automation/n09230945.asp HTTP/1.1\r\n"
         "Host: www.whatismyip.com\r\n"
@@ -135,17 +135,17 @@ bool GetMyExternalIP(unsigned int& ipRet)
 
 
 
-// ½«µØÖ·ĞÅÏ¢´æ´¢ÔÚµØÖ·¿âÖĞ
+// å°†åœ°å€ä¿¡æ¯å­˜å‚¨åœ¨åœ°å€åº“ä¸­
 bool AddAddress(CAddrDB& addrdb, const CAddress& addr)
 {
-	// µØÖ·²»ÄÜÂ·ÓÉ£¬Ôò²»½«´ËµØÖ·¼ÓÈëµØÖ·¿âÖĞ
+	// åœ°å€ä¸èƒ½è·¯ç”±ï¼Œåˆ™ä¸å°†æ­¤åœ°å€åŠ å…¥åœ°å€åº“ä¸­
     if (!addr.IsRoutable())
         return false;
     if (addr.ip == addrLocalHost.ip)
         return false;
     CRITICAL_BLOCK(cs_mapAddresses)
     {
-		// ¸ù¾İµØÖ·µÄip+portÀ´²éÑ¯¶ÔÓ¦µÄÄÚ´æ¶ÔÏómapAddresses£¬
+		// æ ¹æ®åœ°å€çš„ip+portæ¥æŸ¥è¯¢å¯¹åº”çš„å†…å­˜å¯¹è±¡mapAddressesï¼Œ
         map<vector<unsigned char>, CAddress>::iterator it = mapAddresses.find(addr.GetKey());
         if (it == mapAddresses.end())
         {
@@ -159,7 +159,7 @@ bool AddAddress(CAddrDB& addrdb, const CAddress& addr)
             CAddress& addrFound = (*it).second;
             if ((addrFound.nServices | addr.nServices) != addrFound.nServices)
             {
-				// Ôö¼ÓµØÖ·¶ÔÓ¦µÄ·şÎñÀàĞÍ£¬²¢½«ÆäĞ´ÈëÊı¾İ¿â
+				// å¢åŠ åœ°å€å¯¹åº”çš„æœåŠ¡ç±»å‹ï¼Œå¹¶å°†å…¶å†™å…¥æ•°æ®åº“
                 // Services have been added
                 addrFound.nServices |= addr.nServices;
                 addrdb.WriteAddress(addrFound);
@@ -279,7 +279,7 @@ void CNode::CancelSubscribe(unsigned int nChannel)
 
 
 
-// ¸ù¾İipÔÚ±¾µØ´æ´¢µÄ½ÚµãÁĞ±ívNodesÖĞ²éÕÒ¶ÔÓ¦µÄ½Úµã
+// æ ¹æ®ipåœ¨æœ¬åœ°å­˜å‚¨çš„èŠ‚ç‚¹åˆ—è¡¨vNodesä¸­æŸ¥æ‰¾å¯¹åº”çš„èŠ‚ç‚¹
 CNode* FindNode(unsigned int ip)
 {
     CRITICAL_BLOCK(cs_vNodes)
@@ -301,28 +301,28 @@ CNode* FindNode(CAddress addr)
     }
     return NULL;
 }
-// Á¬½Ó¶ÔÓ¦µØÖ·µÄ½Úµã
+// è¿æ¥å¯¹åº”åœ°å€çš„èŠ‚ç‚¹
 CNode* ConnectNode(CAddress addrConnect, int64 nTimeout)
 {
     if (addrConnect.ip == addrLocalHost.ip)
         return NULL;
 
-	// Ê¹ÓÃipµØÖ·ÔÚ±¾µØ¶ÔÓ¦µÄ½ÚµãÁĞ±íÖĞ²éÕÒ¶ÔÓ¦µÄ½Úµã£¬Èç¹û´æÔÚÔòÖ±½Ó·µ»Ø¶ÔÓ¦µÄ½Úµã
+	// ä½¿ç”¨ipåœ°å€åœ¨æœ¬åœ°å¯¹åº”çš„èŠ‚ç‚¹åˆ—è¡¨ä¸­æŸ¥æ‰¾å¯¹åº”çš„èŠ‚ç‚¹ï¼Œå¦‚æœå­˜åœ¨åˆ™ç›´æ¥è¿”å›å¯¹åº”çš„èŠ‚ç‚¹
     // Look for an existing connection
     CNode* pnode = FindNode(addrConnect.ip);
     if (pnode)
     {
         if (nTimeout != 0)
-            pnode->AddRef(nTimeout); // ÍÆ³Ù½Úµã¶ÔÓ¦µÄÊÍ·ÅÊ±¼ä
+            pnode->AddRef(nTimeout); // æ¨è¿ŸèŠ‚ç‚¹å¯¹åº”çš„é‡Šæ”¾æ—¶é—´
         else
-            pnode->AddRef(); // Ôö¼Ó½Úµã¶ÔÓ¦µÄÒıÓÃ
+            pnode->AddRef(); // å¢åŠ èŠ‚ç‚¹å¯¹åº”çš„å¼•ç”¨
         return pnode;
     }
 
     /// debug print
     printf("trying %s\n", addrConnect.ToString().c_str());
 
-	// ¶ÔÇëÇóµÄµØÖ·½øĞĞÁ¬½Ó
+	// å¯¹è¯·æ±‚çš„åœ°å€è¿›è¡Œè¿æ¥
     // Connect
     SOCKET hSocket;
     if (ConnectSocket(addrConnect, hSocket))
@@ -330,14 +330,14 @@ CNode* ConnectNode(CAddress addrConnect, int64 nTimeout)
         /// debug print
         printf("connected %s\n", addrConnect.ToString().c_str());
 
-        // Add node ĞÂÔö½Úµã£¨¸ù¾İÇëÇóµØÖ·)
+        // Add node æ–°å¢èŠ‚ç‚¹ï¼ˆæ ¹æ®è¯·æ±‚åœ°å€)
         CNode* pnode = new CNode(hSocket, addrConnect, false);
         if (nTimeout != 0)
             pnode->AddRef(nTimeout);
         else
             pnode->AddRef();
         CRITICAL_BLOCK(cs_vNodes)
-            vNodes.push_back(pnode); // ½«ĞÂÔö½Úµã·ÅÈë¶ÔÓ¦µÄ½ÚµãÁĞ±íÖĞ
+            vNodes.push_back(pnode); // å°†æ–°å¢èŠ‚ç‚¹æ”¾å…¥å¯¹åº”çš„èŠ‚ç‚¹åˆ—è¡¨ä¸­
 
         CRITICAL_BLOCK(cs_mapAddresses)
             mapAddresses[addrConnect.GetKey()].nLastFailed = 0;
@@ -381,7 +381,7 @@ void CNode::Disconnect()
 
 
 
-// socket ´¦Àí£¬parag¶ÔÓ¦µÄÊÇ±¾µØ½Úµã¿ªÆôµÄ¼àÌısocket
+// socket å¤„ç†ï¼Œparagå¯¹åº”çš„æ˜¯æœ¬åœ°èŠ‚ç‚¹å¼€å¯çš„ç›‘å¬socket
 void ThreadSocketHandler(void* parg)
 {
     IMPLEMENT_RANDOMIZE_STACK(ThreadSocketHandler(parg));
@@ -399,11 +399,11 @@ void ThreadSocketHandler(void* parg)
         Sleep(5000);
     }
 }
-// socket ´¦Àí£¬parag¶ÔÓ¦µÄÊÇ±¾µØ½Úµã¿ªÆôµÄ¼àÌısocket
+// socket å¤„ç†ï¼Œparagå¯¹åº”çš„æ˜¯æœ¬åœ°èŠ‚ç‚¹å¼€å¯çš„ç›‘å¬socket
 void ThreadSocketHandler2(void* parg)
 {
     printf("ThreadSocketHandler started\n");
-    SOCKET hListenSocket = *(SOCKET*)parg; // »ñµÃ¼àÌısocket
+    SOCKET hListenSocket = *(SOCKET*)parg; // è·å¾—ç›‘å¬socket
     list<CNode*> vNodesDisconnected;
     int nPrevNodeCount = 0;
 
@@ -414,14 +414,14 @@ void ThreadSocketHandler2(void* parg)
         //
         CRITICAL_BLOCK(cs_vNodes)
         {
-            // Disconnect duplicate connections ÊÍ·ÅÍ¬Ò»¸öipÖØ¸´Á´½Ó¶ÔÓ¦µÄ½Úµã£¬¿ÉÄÜÊÇ²»Í¬¶Ë¿Ú
+            // Disconnect duplicate connections é‡Šæ”¾åŒä¸€ä¸ªipé‡å¤é“¾æ¥å¯¹åº”çš„èŠ‚ç‚¹ï¼Œå¯èƒ½æ˜¯ä¸åŒç«¯å£
             map<unsigned int, CNode*> mapFirst;
             foreach(CNode* pnode, vNodes)
             {
                 if (pnode->fDisconnect)
                     continue;
                 unsigned int ip = pnode->addr.ip;
-				// ±¾µØÖ÷»úipµØÖ·¶ÔÓ¦µÄÊÇ0£¬ËùÒÔËùÓĞµÄipµØÖ·¶¼Ó¦¸Ã´óÓÚÕâ¸öip
+				// æœ¬åœ°ä¸»æœºipåœ°å€å¯¹åº”çš„æ˜¯0ï¼Œæ‰€ä»¥æ‰€æœ‰çš„ipåœ°å€éƒ½åº”è¯¥å¤§äºè¿™ä¸ªip
                 if (mapFirst.count(ip) && addrLocalHost.ip < ip)
                 {
                     // In case two nodes connect to each other at once,
@@ -445,29 +445,29 @@ void ThreadSocketHandler2(void* parg)
                 }
                 mapFirst[ip] = pnode;
             }
-			// ¶Ï¿ª²»Ê¹ÓÃµÄ½Úµã
+			// æ–­å¼€ä¸ä½¿ç”¨çš„èŠ‚ç‚¹
             // Disconnect unused nodes
             vector<CNode*> vNodesCopy = vNodes;
             foreach(CNode* pnode, vNodesCopy)
             {
-				// ½Úµã×¼±¸ÊÍ·ÅÁ´½Ó£¬²¢ÇÒ¶ÔÓ¦µÄ½ÓÊÕºÍ·¢ËÍ»º´æÇø¶¼ÊÇ¿Õ
+				// èŠ‚ç‚¹å‡†å¤‡é‡Šæ”¾é“¾æ¥ï¼Œå¹¶ä¸”å¯¹åº”çš„æ¥æ”¶å’Œå‘é€ç¼“å­˜åŒºéƒ½æ˜¯ç©º
                 if (pnode->ReadyToDisconnect() && pnode->vRecv.empty() && pnode->vSend.empty())
                 {
-					// ´Ó½ÚµãÁĞ±íÖĞÒÆ³ı
+					// ä»èŠ‚ç‚¹åˆ—è¡¨ä¸­ç§»é™¤
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
                     pnode->Disconnect();
 
-					// ½«¶ÔÓ¦×¼±¸ÊÍ·ÅµÄ½Úµã·ÅÔÚ¶ÔÓ¦µÄ½ÚµãÊÍ·ÅÁ´½Ó³ØÖĞ£¬µÈ´ı¶ÔÓ¦½ÚµãµÄËùÓĞÒıÓÃÊÍ·Å
+					// å°†å¯¹åº”å‡†å¤‡é‡Šæ”¾çš„èŠ‚ç‚¹æ”¾åœ¨å¯¹åº”çš„èŠ‚ç‚¹é‡Šæ”¾é“¾æ¥æ± ä¸­ï¼Œç­‰å¾…å¯¹åº”èŠ‚ç‚¹çš„æ‰€æœ‰å¼•ç”¨é‡Šæ”¾
                     // hold in disconnected pool until all refs are released
-                    pnode->nReleaseTime = max(pnode->nReleaseTime, GetTime() + 5 * 60); // ÏòºóÍÆ³Ù5·ÖÖÓ
+                    pnode->nReleaseTime = max(pnode->nReleaseTime, GetTime() + 5 * 60); // å‘åæ¨è¿Ÿ5åˆ†é’Ÿ
                     if (pnode->fNetworkNode)
                         pnode->Release();
                     vNodesDisconnected.push_back(pnode);
                 }
             }
 
-			// É¾³ı¶Ë¿ÚµÄÁ¬½ÓµÄ½Úµã£ºÉ¾³ıµÄÌõ¼şÊÇ¶ÔÓ¦½ÚµãµÄÒıÓÃĞ¡ÓÚµÈÓÚ0
+			// åˆ é™¤ç«¯å£çš„è¿æ¥çš„èŠ‚ç‚¹ï¼šåˆ é™¤çš„æ¡ä»¶æ˜¯å¯¹åº”èŠ‚ç‚¹çš„å¼•ç”¨å°äºç­‰äº0
             // Delete disconnected nodes
             list<CNode*> vNodesDisconnectedCopy = vNodesDisconnected;
             foreach(CNode* pnode, vNodesDisconnectedCopy)
@@ -491,45 +491,45 @@ void ThreadSocketHandler2(void* parg)
         }
         if (vNodes.size() != nPrevNodeCount)
         {
-            nPrevNodeCount = vNodes.size(); // ¼ÇÂ¼Ç°Ò»´Î½Úµã¶ÔÓ¦µÄÊıÁ¿
+            nPrevNodeCount = vNodes.size(); // è®°å½•å‰ä¸€æ¬¡èŠ‚ç‚¹å¯¹åº”çš„æ•°é‡
             MainFrameRepaint();
         }
 
 
-        // ÕÒ³öÄÄÒ»¸ösocketÓĞÊı¾İÒª·¢ËÍ
+        // æ‰¾å‡ºå“ªä¸€ä¸ªsocketæœ‰æ•°æ®è¦å‘é€
         // Find which sockets have data to receive
         //
         struct timeval timeout;
         timeout.tv_sec  = 0;
-        timeout.tv_usec = 50000; // frequency to poll pnode->vSend ×ÉÑ¯½ÚµãÊÇ·ñÓĞÊı¾İÒª·¢ËÍµÄÆµÂÊ
+        timeout.tv_usec = 50000; // frequency to poll pnode->vSend å’¨è¯¢èŠ‚ç‚¹æ˜¯å¦æœ‰æ•°æ®è¦å‘é€çš„é¢‘ç‡
 
-        struct fd_set fdsetRecv; // ¼ÇÂ¼ËùÓĞ½Úµã¶ÔÓ¦µÄsocket¾ä±úºÍ¼àÌısocket¾ä±ú
-        struct fd_set fdsetSend; // ¼ÇÂ¼ËùÓĞÓĞ´ı·¢ËÍÏûÏ¢µÄ½Úµã¶ÔÓ¦µÄsocket¾ä±ú
+        struct fd_set fdsetRecv; // è®°å½•æ‰€æœ‰èŠ‚ç‚¹å¯¹åº”çš„socketå¥æŸ„å’Œç›‘å¬socketå¥æŸ„
+        struct fd_set fdsetSend; // è®°å½•æ‰€æœ‰æœ‰å¾…å‘é€æ¶ˆæ¯çš„èŠ‚ç‚¹å¯¹åº”çš„socketå¥æŸ„
         FD_ZERO(&fdsetRecv);
         FD_ZERO(&fdsetSend);
         SOCKET hSocketMax = 0;
-        FD_SET(hListenSocket, &fdsetRecv); // FD_SET½«hListenSocket ·ÅÈëfdsetRecv¶ÔÓ¦µÄÊı×éµÄ×îºó
+        FD_SET(hListenSocket, &fdsetRecv); // FD_SETå°†hListenSocket æ”¾å…¥fdsetRecvå¯¹åº”çš„æ•°ç»„çš„æœ€å
         hSocketMax = max(hSocketMax, hListenSocket);
         CRITICAL_BLOCK(cs_vNodes)
         {
             foreach(CNode* pnode, vNodes)
             {
                 FD_SET(pnode->hSocket, &fdsetRecv);
-                hSocketMax = max(hSocketMax, pnode->hSocket); // ÕÒ³öËùÓĞ½Úµã¶ÔÓ¦µÄsocketµÄ×î´óÖµ£¬°üÀ¨¼àÌısocket
+                hSocketMax = max(hSocketMax, pnode->hSocket); // æ‰¾å‡ºæ‰€æœ‰èŠ‚ç‚¹å¯¹åº”çš„socketçš„æœ€å¤§å€¼ï¼ŒåŒ…æ‹¬ç›‘å¬socket
                 TRY_CRITICAL_BLOCK(pnode->cs_vSend)
                     if (!pnode->vSend.empty())
-                        FD_SET(pnode->hSocket, &fdsetSend); // FD_SET ×Ö¶ÎÉèÖÃ
+                        FD_SET(pnode->hSocket, &fdsetSend); // FD_SET å­—æ®µè®¾ç½®
             }
         }
 
         vfThreadRunning[0] = false;
-		// º¯Êı²Î¿¼£ºhttps://blog.csdn.net/rootusers/article/details/43604729
-		/*È·¶¨Ò»¸ö»ò¶à¸öÌ×½Ó¿ÚµÄ×´Ì¬£¬±¾º¯ÊıÓÃÓÚÈ·¶¨Ò»¸ö»ò¶à¸öÌ×½Ó¿ÚµÄ×´Ì¬£¬¶ÔÃ¿Ò»¸öÌ×½Ó¿Ú£¬µ÷ÓÃÕß¿É²éÑ¯ËüµÄ¿É¶ÁĞÔ¡¢¿ÉĞ´ĞÔ¼°´íÎó×´Ì¬ĞÅÏ¢£¬ÓÃfd_set½á¹¹À´±íÊ¾Ò»×éµÈ´ı¼ì²éµÄÌ×½Ó¿Ú£¬ÔÚµ÷ÓÃ·µ»ØÊ±£¬Õâ¸ö½á¹¹´æÓĞÂú×ãÒ»¶¨Ìõ¼şµÄÌ×½Ó¿Ú×éµÄ×Ó¼¯£¬²¢ÇÒselect()·µ»ØÂú×ãÌõ¼şµÄÌ×½Ó¿ÚµÄÊıÄ¿¡£
-			¼òµ¥À´ËµselectÓÃÀ´Ìî³äÒ»×é¿ÉÓÃµÄsocket¾ä±ú£¬µ±Âú×ãÏÂÁĞÖ®Ò»Ìõ¼şÊ±£º
-			1.¿ÉÒÔ¶ÁÈ¡µÄsockets¡£µ±ÕâĞ©socket±»·µ»ØÊ±£¬ÔÚÕâĞ©socketÉÏÖ´ĞĞrecv/acceptµÈ²Ù×÷²»»á²úÉú×èÈû;
-			2.¿ÉÒÔĞ´ÈëµÄsockets¡£µ±ÕâĞ©socket±»·µ»ØÊ±£¬ÔÚÕâĞ©socketÉÏÖ´ĞĞsendµÈ²»»á²úÉú×èÈû;
-			3.·µ»ØÓĞ´íÎóµÄsockets¡£
-			select()µÄ»úÖÆÖĞÌá¹©Ò»fd_setµÄÊı¾İ½á¹¹£¬Êµ¼ÊÉÏÊĞÒ»longÀàĞÍµÄÊı×é£¬Ã¿Ò»¸öÊı×éÔªËØ¶¼ÄÜÓëÒ»´ò¿ªµÄÎÄ¼ş¾ä±ú(»òÕßÊÇÆäËûµÄsocket¾ä±ú£¬ÎÄ¼şÃüÃû¹ÜµÀµÈ)½¨Á¢ÁªÏµ£¬½¨Á¢ÁªÏµµÄ¹¤×÷Êµ¼ÊÉÏÓÉ³ÌĞòÔ±Íê³É£¬µ±µ÷ÓÃselect()µÄÊ±ºò£¬ÓÉÄÚºË¸ù¾İIO×´Ì¬ĞŞ¸Äfd_setµÄÄÚÈİ£¬ÓÉ´ËÀ´Í¨ÖªÖ´ĞĞÁËselect()µÄ½ø³ÌÄÇÒ»socket»òÎÄ¼ş¿É¶Á¡£
+		// å‡½æ•°å‚è€ƒï¼šhttps://blog.csdn.net/rootusers/article/details/43604729
+		/*ç¡®å®šä¸€ä¸ªæˆ–å¤šä¸ªå¥—æ¥å£çš„çŠ¶æ€ï¼Œæœ¬å‡½æ•°ç”¨äºç¡®å®šä¸€ä¸ªæˆ–å¤šä¸ªå¥—æ¥å£çš„çŠ¶æ€ï¼Œå¯¹æ¯ä¸€ä¸ªå¥—æ¥å£ï¼Œè°ƒç”¨è€…å¯æŸ¥è¯¢å®ƒçš„å¯è¯»æ€§ã€å¯å†™æ€§åŠé”™è¯¯çŠ¶æ€ä¿¡æ¯ï¼Œç”¨fd_setç»“æ„æ¥è¡¨ç¤ºä¸€ç»„ç­‰å¾…æ£€æŸ¥çš„å¥—æ¥å£ï¼Œåœ¨è°ƒç”¨è¿”å›æ—¶ï¼Œè¿™ä¸ªç»“æ„å­˜æœ‰æ»¡è¶³ä¸€å®šæ¡ä»¶çš„å¥—æ¥å£ç»„çš„å­é›†ï¼Œå¹¶ä¸”select()è¿”å›æ»¡è¶³æ¡ä»¶çš„å¥—æ¥å£çš„æ•°ç›®ã€‚
+			ç®€å•æ¥è¯´selectç”¨æ¥å¡«å……ä¸€ç»„å¯ç”¨çš„socketå¥æŸ„ï¼Œå½“æ»¡è¶³ä¸‹åˆ—ä¹‹ä¸€æ¡ä»¶æ—¶ï¼š
+			1.å¯ä»¥è¯»å–çš„socketsã€‚å½“è¿™äº›socketè¢«è¿”å›æ—¶ï¼Œåœ¨è¿™äº›socketä¸Šæ‰§è¡Œrecv/acceptç­‰æ“ä½œä¸ä¼šäº§ç”Ÿé˜»å¡;
+			2.å¯ä»¥å†™å…¥çš„socketsã€‚å½“è¿™äº›socketè¢«è¿”å›æ—¶ï¼Œåœ¨è¿™äº›socketä¸Šæ‰§è¡Œsendç­‰ä¸ä¼šäº§ç”Ÿé˜»å¡;
+			3.è¿”å›æœ‰é”™è¯¯çš„socketsã€‚
+			select()çš„æœºåˆ¶ä¸­æä¾›ä¸€fd_setçš„æ•°æ®ç»“æ„ï¼Œå®é™…ä¸Šå¸‚ä¸€longç±»å‹çš„æ•°ç»„ï¼Œæ¯ä¸€ä¸ªæ•°ç»„å…ƒç´ éƒ½èƒ½ä¸ä¸€æ‰“å¼€çš„æ–‡ä»¶å¥æŸ„(æˆ–è€…æ˜¯å…¶ä»–çš„socketå¥æŸ„ï¼Œæ–‡ä»¶å‘½åç®¡é“ç­‰)å»ºç«‹è”ç³»ï¼Œå»ºç«‹è”ç³»çš„å·¥ä½œå®é™…ä¸Šç”±ç¨‹åºå‘˜å®Œæˆï¼Œå½“è°ƒç”¨select()çš„æ—¶å€™ï¼Œç”±å†…æ ¸æ ¹æ®IOçŠ¶æ€ä¿®æ”¹fd_setçš„å†…å®¹ï¼Œç”±æ­¤æ¥é€šçŸ¥æ‰§è¡Œäº†select()çš„è¿›ç¨‹é‚£ä¸€socketæˆ–æ–‡ä»¶å¯è¯»ã€‚
 		*/
         int nSelect = select(hSocketMax + 1, &fdsetRecv, &fdsetSend, NULL, &timeout);
         vfThreadRunning[0] = true;
@@ -540,12 +540,12 @@ void ThreadSocketHandler2(void* parg)
             printf("select failed: %d\n", nErr);
             for (int i = 0; i <= hSocketMax; i++)
             {
-                FD_SET(i, &fdsetRecv); // ËùÓĞµÄÖµÉèÖÃÒ»±é
+                FD_SET(i, &fdsetRecv); // æ‰€æœ‰çš„å€¼è®¾ç½®ä¸€é
                 FD_SET(i, &fdsetSend);
             }
             Sleep(timeout.tv_usec/1000);
         }
-		// Ëæ»úÔö¼ÓÖÖ×Ó£ºĞÔÄÜ¼ÆÊı
+		// éšæœºå¢åŠ ç§å­ï¼šæ€§èƒ½è®¡æ•°
         RandAddSeed();
 
         //// debug print
@@ -557,14 +557,14 @@ void ThreadSocketHandler2(void* parg)
         //printf("\n");
 
 
-        // Èç¹ûfdsetRecvÖĞÓĞ¼àÌısocket£¬Ôò½ÓÊÕ¸Ä¼àÌısocket¶ÔÓ¦µÄÁ¬½ÓÇëÇó£¬²¢½«Á´½ÓÇëÇóÉèÖÃÎªĞÂµÄ½Úµã
+        // å¦‚æœfdsetRecvä¸­æœ‰ç›‘å¬socketï¼Œåˆ™æ¥æ”¶æ”¹ç›‘å¬socketå¯¹åº”çš„è¿æ¥è¯·æ±‚ï¼Œå¹¶å°†é“¾æ¥è¯·æ±‚è®¾ç½®ä¸ºæ–°çš„èŠ‚ç‚¹
         // Accept new connections
-        // ÅĞ¶Ï·¢ËÍ»º³åÇøÖĞÊÇ·ñÓĞ¶ÔÓ¦µÄsocket£¬Èç¹ûÓĞÔò½ÓÊÕĞÂµÄ½»Ò×
+        // åˆ¤æ–­å‘é€ç¼“å†²åŒºä¸­æ˜¯å¦æœ‰å¯¹åº”çš„socketï¼Œå¦‚æœæœ‰åˆ™æ¥æ”¶æ–°çš„äº¤æ˜“
         if (FD_ISSET(hListenSocket, &fdsetRecv))
         {
             struct sockaddr_in sockaddr;
             int len = sizeof(sockaddr);
-            SOCKET hSocket = accept(hListenSocket, (struct sockaddr*)&sockaddr, &len); // ½ÓÊÕsocketÁ¬½Ó
+            SOCKET hSocket = accept(hListenSocket, (struct sockaddr*)&sockaddr, &len); // æ¥æ”¶socketè¿æ¥
             CAddress addr(sockaddr);
             if (hSocket == INVALID_SOCKET)
             {
@@ -574,7 +574,7 @@ void ThreadSocketHandler2(void* parg)
             else
             {
                 printf("accepted connection from %s\n", addr.ToString().c_str());
-                CNode* pnode = new CNode(hSocket, addr, true); // ÓĞĞÂµÄsocketÁ¬½Ó£¬ÔòĞÂ½¨¶ÔÓ¦µÄ½Úµã£¬²¢½«½ÚµãÔÚ¼ÓÈë±¾µØ½ÚµãÁĞ±íÖĞ
+                CNode* pnode = new CNode(hSocket, addr, true); // æœ‰æ–°çš„socketè¿æ¥ï¼Œåˆ™æ–°å»ºå¯¹åº”çš„èŠ‚ç‚¹ï¼Œå¹¶å°†èŠ‚ç‚¹åœ¨åŠ å…¥æœ¬åœ°èŠ‚ç‚¹åˆ—è¡¨ä¸­
                 pnode->AddRef();
                 CRITICAL_BLOCK(cs_vNodes)
                     vNodes.push_back(pnode);
@@ -582,7 +582,7 @@ void ThreadSocketHandler2(void* parg)
         }
 
 
-        // ¶ÔÃ¿Ò»¸ösocket½øĞĞ·şÎñ´¦Àí
+        // å¯¹æ¯ä¸€ä¸ªsocketè¿›è¡ŒæœåŠ¡å¤„ç†
         // Service each socket
         //
         vector<CNode*> vNodesCopy;
@@ -591,9 +591,9 @@ void ThreadSocketHandler2(void* parg)
         foreach(CNode* pnode, vNodesCopy)
         {
             CheckForShutdown(0);
-            SOCKET hSocket = pnode->hSocket; // »ñÈ¡Ã¿Ò»¸ö½Úµã¶ÔÓ¦µÄsocket
+            SOCKET hSocket = pnode->hSocket; // è·å–æ¯ä¸€ä¸ªèŠ‚ç‚¹å¯¹åº”çš„socket
 
-            // ´Ó½Úµã¶ÔÓ¦µÄsocketÖĞ¶ÁÈ¡¶ÔÓ¦µÄÊı¾İ£¬½«Êı¾İ·ÅÈë½ÚµãµÄ½ÓÊÕ»º³åÇøÖĞ
+            // ä»èŠ‚ç‚¹å¯¹åº”çš„socketä¸­è¯»å–å¯¹åº”çš„æ•°æ®ï¼Œå°†æ•°æ®æ”¾å…¥èŠ‚ç‚¹çš„æ¥æ”¶ç¼“å†²åŒºä¸­
             // Receive
             //
             if (FD_ISSET(hSocket, &fdsetRecv))
@@ -605,12 +605,12 @@ void ThreadSocketHandler2(void* parg)
 
                     // typical socket buffer is 8K-64K
                     const unsigned int nBufSize = 0x10000;
-                    vRecv.resize(nPos + nBufSize);// µ÷Õû½ÓÊÕ»º³åÇøµÄ´óĞ¡
-                    int nBytes = recv(hSocket, &vRecv[nPos], nBufSize, 0);// ´ÓsocketÖĞ½ÓÊÕ¶ÔÓ¦µÄÊı¾İ
+                    vRecv.resize(nPos + nBufSize);// è°ƒæ•´æ¥æ”¶ç¼“å†²åŒºçš„å¤§å°
+                    int nBytes = recv(hSocket, &vRecv[nPos], nBufSize, 0);// ä»socketä¸­æ¥æ”¶å¯¹åº”çš„æ•°æ®
                     vRecv.resize(nPos + max(nBytes, 0));
                     if (nBytes == 0)
                     {
-                        // socket closed gracefully £¨socketÓÅÑÅµÄ¹Ø±Õ£©
+                        // socket closed gracefully ï¼ˆsocketä¼˜é›…çš„å…³é—­ï¼‰
                         if (!pnode->fDisconnect)
                             printf("recv: socket closed\n");
                         pnode->fDisconnect = true;
@@ -629,7 +629,7 @@ void ThreadSocketHandler2(void* parg)
                 }
             }
 
-            // ½«½Úµã¶ÔÓ¦µÄ·¢ËÍ»º³åÖĞµÄÄÚÈİ·¢ËÍ³öÈ¥
+            // å°†èŠ‚ç‚¹å¯¹åº”çš„å‘é€ç¼“å†²ä¸­çš„å†…å®¹å‘é€å‡ºå»
             // Send
             //
             if (FD_ISSET(hSocket, &fdsetSend))
@@ -639,10 +639,10 @@ void ThreadSocketHandler2(void* parg)
                     CDataStream& vSend = pnode->vSend;
                     if (!vSend.empty())
                     {
-                        int nBytes = send(hSocket, &vSend[0], vSend.size(), 0); // ´Ó½Úµã¶ÔÓ¦µÄ·¢ËÍ»º³åÇøÖĞ·¢ËÍÊı¾İ³öÈ¥
+                        int nBytes = send(hSocket, &vSend[0], vSend.size(), 0); // ä»èŠ‚ç‚¹å¯¹åº”çš„å‘é€ç¼“å†²åŒºä¸­å‘é€æ•°æ®å‡ºå»
                         if (nBytes > 0)
                         {
-                            vSend.erase(vSend.begin(), vSend.begin() + nBytes);// ´Ó·¢ËÍ»º³åÇøÖĞÒÆ³ı·¢ËÍ¹ıµÄÄÚÈİ
+                            vSend.erase(vSend.begin(), vSend.begin() + nBytes);// ä»å‘é€ç¼“å†²åŒºä¸­ç§»é™¤å‘é€è¿‡çš„å†…å®¹
                         }
                         else if (nBytes == 0)
                         {
@@ -691,14 +691,14 @@ void ThreadOpenConnections(void* parg)
         Sleep(5000);
     }
 }
-// ¶ÔÓÚÃ¿Ò»¸ö´ò¿ª½ÚµãµÄÁ´½Ó£¬½øĞĞ½ÚµãÖ®¼äĞÅÏ¢Í¨ĞÅ£¬»ñµÃ½Úµã¶ÔÓ¦µÄ×îĞÂĞÅÏ¢£¬±ÈÈç½Úµã¶ÔÓ¦µÄÖªµÀµØÖ·½øĞĞ½»»»µÈ
+// å¯¹äºæ¯ä¸€ä¸ªæ‰“å¼€èŠ‚ç‚¹çš„é“¾æ¥ï¼Œè¿›è¡ŒèŠ‚ç‚¹ä¹‹é—´ä¿¡æ¯é€šä¿¡ï¼Œè·å¾—èŠ‚ç‚¹å¯¹åº”çš„æœ€æ–°ä¿¡æ¯ï¼Œæ¯”å¦‚èŠ‚ç‚¹å¯¹åº”çš„çŸ¥é“åœ°å€è¿›è¡Œäº¤æ¢ç­‰
 void ThreadOpenConnections2(void* parg)
 {
     printf("ThreadOpenConnections started\n");
 
-	// ³õÊ¼»¯ÍøÂçÁ¬½Ó
+	// åˆå§‹åŒ–ç½‘ç»œè¿æ¥
     // Initiate network connections
-    const int nMaxConnections = 15; // ×î´óÁ¬½ÓÊı
+    const int nMaxConnections = 15; // æœ€å¤§è¿æ¥æ•°
     loop
     {
         // Wait
@@ -713,7 +713,7 @@ void ThreadOpenConnections2(void* parg)
         CheckForShutdown(1);
 
 
-		// Ip¶ÔÓ¦µÄCÀàµØÖ·£¬ÏàÍ¬µÄCÀàµØÖ··ÅÔÚÒ»Æğ
+		// Ipå¯¹åº”çš„Cç±»åœ°å€ï¼Œç›¸åŒçš„Cç±»åœ°å€æ”¾åœ¨ä¸€èµ·
         // Make a list of unique class C's
         unsigned char pchIPCMask[4] = { 0xff, 0xff, 0xff, 0x00 };
         unsigned int nIPCMask = *(unsigned int*)pchIPCMask;
@@ -722,7 +722,7 @@ void ThreadOpenConnections2(void* parg)
         {
             vIPC.reserve(mapAddresses.size());
             unsigned int nPrev = 0;
-			// mapAddressÒÑ¾­½øĞĞÅÅĞòÁË£¬Ä¬ÈÏÊÇÉúĞ§ÅÅĞò
+			// mapAddresså·²ç»è¿›è¡Œæ’åºäº†ï¼Œé»˜è®¤æ˜¯ç”Ÿæ•ˆæ’åº
             foreach(const PAIRTYPE(vector<unsigned char>, CAddress)& item, mapAddresses)
             {
                 const CAddress& addr = item.second;
@@ -737,11 +737,11 @@ void ThreadOpenConnections2(void* parg)
             }
         }
 
-        // IPÑ¡ÔñµÄ¹ı³Ì
-        // The IP selection process is designed to limit vulnerabilityÖÂÃüĞÔ to address flooding.
+        // IPé€‰æ‹©çš„è¿‡ç¨‹
+        // The IP selection process is designed to limit vulnerabilityè‡´å‘½æ€§ to address flooding.
         // Any class C (a.b.c.?) has an equal chance of being chosen, then an IP is
         // chosen within the class C.  An attacker may be able to allocate many IPs, but
-        // they would normally be concentrated in blocks of class C's.  They can hog¶ÀÕ¼ the
+        // they would normally be concentrated in blocks of class C's.  They can hogç‹¬å  the
         // attention within their class C, but not the whole IP address space overall.
         // A lone node in a class C will get as much attention as someone holding all 255
         // IPs in another class C.
@@ -750,11 +750,11 @@ void ThreadOpenConnections2(void* parg)
         int nLimit = vIPC.size();
         while (!fSuccess && nLimit-- > 0)
         {
-            // Choose a random class C Ëæ»ú»ñÈ¡Ò»¸öCÀàµØÖ·
+            // Choose a random class C éšæœºè·å–ä¸€ä¸ªCç±»åœ°å€
             unsigned int ipC = vIPC[GetRand(vIPC.size())];
 
             // Organize all addresses in the class C by IP
-            // ÓÅÏÈÑ¡ÔñCÀàµØÖ·£¨ÀëÄã×î½üµÄµØÖ·£©
+            // ä¼˜å…ˆé€‰æ‹©Cç±»åœ°å€ï¼ˆç¦»ä½ æœ€è¿‘çš„åœ°å€ï¼‰
             map<unsigned int, vector<CAddress> > mapIP;
             CRITICAL_BLOCK(cs_mapAddresses)
             {
@@ -762,8 +762,8 @@ void ThreadOpenConnections2(void* parg)
                 if (nDelay > 8 * 60 * 60)
                     nDelay = 8 * 60 * 60;
 				/*
-				map::lower_bound(key):·µ»ØmapÖĞµÚÒ»¸ö´óÓÚ»òµÈÓÚkeyµÄµü´úÆ÷Ö¸Õë
-				map::upper_bound(key):·µ»ØmapÖĞµÚÒ»¸ö´óÓÚkeyµÄµü´úÆ÷Ö¸Õë
+				map::lower_bound(key):è¿”å›mapä¸­ç¬¬ä¸€ä¸ªå¤§äºæˆ–ç­‰äºkeyçš„è¿­ä»£å™¨æŒ‡é’ˆ
+				map::upper_bound(key):è¿”å›mapä¸­ç¬¬ä¸€ä¸ªå¤§äºkeyçš„è¿­ä»£å™¨æŒ‡é’ˆ
 				*/
                 for (map<vector<unsigned char>, CAddress>::iterator mi = mapAddresses.lower_bound(CAddress(ipC, 0).GetKey());
                      mi != mapAddresses.upper_bound(CAddress(ipC | ~nIPCMask, 0xffff).GetKey());
@@ -771,9 +771,9 @@ void ThreadOpenConnections2(void* parg)
                 {
                     const CAddress& addr = (*mi).second;
                     unsigned int nRandomizer = (addr.nLastFailed * addr.ip * 7777U) % 20000;
-					// µ±Ç°Ê±¼ä - µØÖ·Á¬½Ó×îĞÂÊ§°ÜµÄÊ±¼ä Òª´óÓÚ¶ÔÓ¦½ÚµãÖØÁ¬µÄ¼ä¸ôÊ±¼ä
+					// å½“å‰æ—¶é—´ - åœ°å€è¿æ¥æœ€æ–°å¤±è´¥çš„æ—¶é—´ è¦å¤§äºå¯¹åº”èŠ‚ç‚¹é‡è¿çš„é—´éš”æ—¶é—´
                     if (GetTime() - addr.nLastFailed > nDelay * nRandomizer / 10000)
-                        mapIP[addr.ip].push_back(addr); //Í¬Ò»¸öµØÖ·Çø¶Î²»Í¬µØÖ·£º Í¬Ò»¸öµØÖ·µÄ²»Í¬¶Ë¿Ú£¬ËùÓĞ¶ÔÓ¦Í¬Ò»¸öip»áÓĞ¶à¸öµØÖ·
+                        mapIP[addr.ip].push_back(addr); //åŒä¸€ä¸ªåœ°å€åŒºæ®µä¸åŒåœ°å€ï¼š åŒä¸€ä¸ªåœ°å€çš„ä¸åŒç«¯å£ï¼Œæ‰€æœ‰å¯¹åº”åŒä¸€ä¸ªipä¼šæœ‰å¤šä¸ªåœ°å€
                 }
             }
             if (mapIP.empty())
@@ -781,37 +781,37 @@ void ThreadOpenConnections2(void* parg)
 
             // Choose a random IP in the class C
             map<unsigned int, vector<CAddress> >::iterator mi = mapIP.begin();
-			boost::iterators::advance_adl_barrier::advance(mi, GetRand(mapIP.size())); // ½«Ö¸Õë¶¨Î»µ½Ëæ»úÎ»ÖÃ
+			boost::iterators::advance_adl_barrier::advance(mi, GetRand(mapIP.size())); // å°†æŒ‡é’ˆå®šä½åˆ°éšæœºä½ç½®
 
-			// ±éÀúÍ¬Ò»¸öip¶ÔÓ¦µÄËùÓĞ²»Í¬¶Ë¿Ú
+			// éå†åŒä¸€ä¸ªipå¯¹åº”çš„æ‰€æœ‰ä¸åŒç«¯å£
             // Once we've chosen an IP, we'll try every given port before moving on
             foreach(const CAddress& addrConnect, (*mi).second)
             {
-				// ip²»ÄÜÊÇ±¾µØip£¬ÇÒ²»ÄÜÊÇ·ÇipV4µØÖ·£¬¶ÔÓ¦µÄipµØÖ·²»ÔÚ±¾µØµÄ½ÚµãÁĞ±íÖĞ
+				// ipä¸èƒ½æ˜¯æœ¬åœ°ipï¼Œä¸”ä¸èƒ½æ˜¯éipV4åœ°å€ï¼Œå¯¹åº”çš„ipåœ°å€ä¸åœ¨æœ¬åœ°çš„èŠ‚ç‚¹åˆ—è¡¨ä¸­
                 if (addrConnect.ip == addrLocalHost.ip || !addrConnect.IsIPv4() || FindNode(addrConnect.ip))
                     continue;
-				// Á´½Ó¶ÔÓ¦µØÖ·ĞÅÏ¢µÄ½Úµã
+				// é“¾æ¥å¯¹åº”åœ°å€ä¿¡æ¯çš„èŠ‚ç‚¹
                 CNode* pnode = ConnectNode(addrConnect);
                 if (!pnode)
                     continue;
-                pnode->fNetworkNode = true; //ÉèÖÃ¶ÔÓ¦µÄ½ÚµãÎªÍøÂç½Úµã£¬ÊÇÒòÎª´Ó¶ÔÓ¦µÄ±¾µØ½ÚµãÁĞ±íÖĞÃ»ÓĞ²éÑ¯µ½
+                pnode->fNetworkNode = true; //è®¾ç½®å¯¹åº”çš„èŠ‚ç‚¹ä¸ºç½‘ç»œèŠ‚ç‚¹ï¼Œæ˜¯å› ä¸ºä»å¯¹åº”çš„æœ¬åœ°èŠ‚ç‚¹åˆ—è¡¨ä¸­æ²¡æœ‰æŸ¥è¯¢åˆ°
 
-				// Èç¹û±¾µØÖ÷»úµØÖ·ÄÜ¹»½øĞĞÂ·ÓÉ£¬ÔòĞèÒª¹ã²¥ÎÒÃÇµÄµØÖ·
+				// å¦‚æœæœ¬åœ°ä¸»æœºåœ°å€èƒ½å¤Ÿè¿›è¡Œè·¯ç”±ï¼Œåˆ™éœ€è¦å¹¿æ’­æˆ‘ä»¬çš„åœ°å€
                 if (addrLocalHost.IsRoutable())
                 {
                     // Advertise our address
                     vector<CAddress> vAddrToSend;
                     vAddrToSend.push_back(addrLocalHost);
-                    pnode->PushMessage("addr", vAddrToSend); // ½«ÏûÏ¢ÍÆËÍ³öÈ¥·ÅÈëvsendÖĞ£¬ÔÚÏûÏ¢´¦ÀíÏß³ÌÖĞ½øĞĞ´¦Àí
+                    pnode->PushMessage("addr", vAddrToSend); // å°†æ¶ˆæ¯æ¨é€å‡ºå»æ”¾å…¥vsendä¸­ï¼Œåœ¨æ¶ˆæ¯å¤„ç†çº¿ç¨‹ä¸­è¿›è¡Œå¤„ç†
                 }
 
-				// ´Ó´´½¨µÄ½Úµã»ñµÃ¾¡¿ÉÄÜ¶àµÄµØÖ·ĞÅÏ¢£¬·¢ËÍÏûÏ¢£¬ÔÚÏûÏ¢´¦ÀíÏß³ÌÖĞ½øĞĞ´¦Àí
+				// ä»åˆ›å»ºçš„èŠ‚ç‚¹è·å¾—å°½å¯èƒ½å¤šçš„åœ°å€ä¿¡æ¯ï¼Œå‘é€æ¶ˆæ¯ï¼Œåœ¨æ¶ˆæ¯å¤„ç†çº¿ç¨‹ä¸­è¿›è¡Œå¤„ç†
                 // Get as many addresses as we can
                 pnode->PushMessage("getaddr");
 
                 ////// should the one on the receiving end do this too?
                 // Subscribe our local subscription list
-				// ĞÂ½¨µÄ½ÚµãÒª¶©ÔÄÎÒÃÇ±¾µØÖ÷»ú¶©ÔÄµÄ¶ÔÓ¦Í¨¶Ï
+				// æ–°å»ºçš„èŠ‚ç‚¹è¦è®¢é˜…æˆ‘ä»¬æœ¬åœ°ä¸»æœºè®¢é˜…çš„å¯¹åº”é€šæ–­
                 const unsigned int nHops = 0;
                 for (unsigned int nChannel = 0; nChannel < pnodeLocalHost->vfSubscribe.size(); nChannel++)
                     if (pnodeLocalHost->vfSubscribe[nChannel])
@@ -830,7 +830,7 @@ void ThreadOpenConnections2(void* parg)
 
 
 
-// ÏûÏ¢´¦ÀíÏß³Ì
+// æ¶ˆæ¯å¤„ç†çº¿ç¨‹
 void ThreadMessageHandler(void* parg)
 {
     IMPLEMENT_RANDOMIZE_STACK(ThreadMessageHandler(parg));
@@ -848,19 +848,19 @@ void ThreadMessageHandler(void* parg)
         Sleep(5000);
     }
 }
-// ÏûÏ¢´¦ÀíÏß³Ì
+// æ¶ˆæ¯å¤„ç†çº¿ç¨‹
 void ThreadMessageHandler2(void* parg)
 {
     printf("ThreadMessageHandler started\n");
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
     loop
     {
-		// ÂÖÑ¯Á´½ÓµÄ½ÚµãÓÃÓÚÏûÏ¢´¦Àí
+		// è½®è¯¢é“¾æ¥çš„èŠ‚ç‚¹ç”¨äºæ¶ˆæ¯å¤„ç†
         // Poll the connected nodes for messages
         vector<CNode*> vNodesCopy;
         CRITICAL_BLOCK(cs_vNodes)
             vNodesCopy = vNodes;
-		// ¶ÔÃ¿Ò»¸ö½Úµã½øĞĞÏûÏ¢´¦Àí£º·¢ËÍÏûÏ¢ºÍ½ÓÊÕÏûÏ¢
+		// å¯¹æ¯ä¸€ä¸ªèŠ‚ç‚¹è¿›è¡Œæ¶ˆæ¯å¤„ç†ï¼šå‘é€æ¶ˆæ¯å’Œæ¥æ”¶æ¶ˆæ¯
         foreach(CNode* pnode, vNodesCopy)
         {
             pnode->AddRef();
@@ -915,7 +915,7 @@ void ThreadBitcoinMiner(void* parg)
 
 
 
-// Æô¶¯½Úµã
+// å¯åŠ¨èŠ‚ç‚¹
 bool StartNode(string& strError)
 {
     strError = "";
@@ -1002,22 +1002,22 @@ bool StartNode(string& strError)
         CWalletDB().WriteSetting("addrIncoming", addrIncoming);
     }
 
-	/*IRCÊÇInternet Relay Chat µÄÓ¢ÎÄËõĞ´£¬ÖĞÎÄÒ»°ã³ÆÎª»¥ÁªÍøÖĞ¼ÌÁÄÌì¡£
-	ËüÊÇÓÉ·ÒÀ¼ÈËJarkko OikarinenÓÚ1988ÄêÊ×´´µÄÒ»ÖÖÍøÂçÁÄÌìĞ­Òé¡£
-	¾­¹ıÊ®ÄêµÄ·¢Õ¹£¬Ä¿Ç°ÊÀ½çÉÏÓĞ³¬¹ı60¸ö¹ú¼ÒÌá¹©ÁËIRCµÄ·şÎñ¡£IRCµÄ¹¤×÷Ô­Àí·Ç³£¼òµ¥£¬
-	ÄúÖ»ÒªÔÚ×Ô¼ºµÄPCÉÏÔËĞĞ¿Í»§¶ËÈí¼ş£¬È»ºóÍ¨¹ıÒòÌØÍøÒÔIRCĞ­ÒéÁ¬½Óµ½Ò»Ì¨IRC·şÎñÆ÷ÉÏ¼´¿É¡£
-	ËüµÄÌØµãÊÇËÙ¶È·Ç³£Ö®¿ì£¬ÁÄÌìÊ±¼¸ºõÃ»ÓĞÑÓ³ÙµÄÏÖÏó£¬²¢ÇÒÖ»Õ¼ÓÃºÜĞ¡µÄ´ø¿í×ÊÔ´¡£
-	ËùÓĞÓÃ»§¿ÉÒÔÔÚÒ»¸ö±»³ÆÎª\"Channel\"£¨ÆµµÀ£©µÄµØ·½¾ÍÄ³Ò»»°Ìâ½øĞĞ½»Ì¸»òÃÜÌ¸¡£
-	Ã¿¸öIRCµÄÊ¹ÓÃÕß¶¼ÓĞÒ»¸öNickname£¨êÇ³Æ£©¡£
-	IRCÓÃ»§Ê¹ÓÃÌØ¶¨µÄÓÃ»§¶ËÁÄÌìÈí¼şÁ¬½Óµ½IRC·şÎñÆ÷£¬
-	Í¨¹ı·şÎñÆ÷ÖĞ¼ÌÓëÆäËûÁ¬½Óµ½ÕâÒ»·şÎñÆ÷ÉÏµÄÓÃ»§½»Á÷£¬
-	ËùÒÔIRCµÄÖĞÎÄÃûÎª¡°ÒòÌØÍøÖĞ¼ÌÁÄÌì¡±¡£
+	/*IRCæ˜¯Internet Relay Chat çš„è‹±æ–‡ç¼©å†™ï¼Œä¸­æ–‡ä¸€èˆ¬ç§°ä¸ºäº’è”ç½‘ä¸­ç»§èŠå¤©ã€‚
+	å®ƒæ˜¯ç”±èŠ¬å…°äººJarkko Oikarinenäº1988å¹´é¦–åˆ›çš„ä¸€ç§ç½‘ç»œèŠå¤©åè®®ã€‚
+	ç»è¿‡åå¹´çš„å‘å±•ï¼Œç›®å‰ä¸–ç•Œä¸Šæœ‰è¶…è¿‡60ä¸ªå›½å®¶æä¾›äº†IRCçš„æœåŠ¡ã€‚IRCçš„å·¥ä½œåŸç†éå¸¸ç®€å•ï¼Œ
+	æ‚¨åªè¦åœ¨è‡ªå·±çš„PCä¸Šè¿è¡Œå®¢æˆ·ç«¯è½¯ä»¶ï¼Œç„¶åé€šè¿‡å› ç‰¹ç½‘ä»¥IRCåè®®è¿æ¥åˆ°ä¸€å°IRCæœåŠ¡å™¨ä¸Šå³å¯ã€‚
+	å®ƒçš„ç‰¹ç‚¹æ˜¯é€Ÿåº¦éå¸¸ä¹‹å¿«ï¼ŒèŠå¤©æ—¶å‡ ä¹æ²¡æœ‰å»¶è¿Ÿçš„ç°è±¡ï¼Œå¹¶ä¸”åªå ç”¨å¾ˆå°çš„å¸¦å®½èµ„æºã€‚
+	æ‰€æœ‰ç”¨æˆ·å¯ä»¥åœ¨ä¸€ä¸ªè¢«ç§°ä¸º\"Channel\"ï¼ˆé¢‘é“ï¼‰çš„åœ°æ–¹å°±æŸä¸€è¯é¢˜è¿›è¡Œäº¤è°ˆæˆ–å¯†è°ˆã€‚
+	æ¯ä¸ªIRCçš„ä½¿ç”¨è€…éƒ½æœ‰ä¸€ä¸ªNicknameï¼ˆæ˜µç§°ï¼‰ã€‚
+	IRCç”¨æˆ·ä½¿ç”¨ç‰¹å®šçš„ç”¨æˆ·ç«¯èŠå¤©è½¯ä»¶è¿æ¥åˆ°IRCæœåŠ¡å™¨ï¼Œ
+	é€šè¿‡æœåŠ¡å™¨ä¸­ç»§ä¸å…¶ä»–è¿æ¥åˆ°è¿™ä¸€æœåŠ¡å™¨ä¸Šçš„ç”¨æˆ·äº¤æµï¼Œ
+	æ‰€ä»¥IRCçš„ä¸­æ–‡åä¸ºâ€œå› ç‰¹ç½‘ä¸­ç»§èŠå¤©â€ã€‚
 	*/
     // Get addresses from IRC and advertise ours
     if (_beginthread(ThreadIRCSeed, 0, NULL) == -1)
         printf("Error: _beginthread(ThreadIRCSeed) failed\n");
 
-	// Æô¶¯Ïß³Ì
+	// å¯åŠ¨çº¿ç¨‹
     //
     // Start threads
     //
