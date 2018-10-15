@@ -15,39 +15,39 @@
 
 CCriticalSection cs_main;
 
-map<uint256, CTransaction> mapTransactions;// Èç¹û½»Ò×¶ÔÓ¦µÄÇø¿éÒÑ¾­·ÅÈëÖ÷Á´ÖĞ£¬Ôò½«´ÓÄÚ´æÉÏÉ¾³ıÕâĞ©·ÅÈëÇø¿éÖĞµÄ½»Ò×£¬Ò²¾ÍÊÇËµÕâÀïÃæ½ö½ö±£´æÃ»ÓĞ±»´ò°üµ½Ö÷Á´ÖĞ½»Ò×
+map<uint256, CTransaction> mapTransactions;// å¦‚æœäº¤æ˜“å¯¹åº”çš„åŒºå—å·²ç»æ”¾å…¥ä¸»é“¾ä¸­ï¼Œåˆ™å°†ä»å†…å­˜ä¸Šåˆ é™¤è¿™äº›æ”¾å…¥åŒºå—ä¸­çš„äº¤æ˜“ï¼Œä¹Ÿå°±æ˜¯è¯´è¿™é‡Œé¢ä»…ä»…ä¿å­˜æ²¡æœ‰è¢«æ‰“åŒ…åˆ°ä¸»é“¾ä¸­äº¤æ˜“
 CCriticalSection cs_mapTransactions;
-unsigned int nTransactionsUpdated = 0; // Ã¿´Î¶ÔmapTransactionsÖĞ½»Ò×½øĞĞ¸üĞÂ£¬¶¼¶Ô¸Ã×Ö¶Î½øĞĞ++²Ù×÷
-map<COutPoint, CInPoint> mapNextTx;// Èç¹û¶ÔÓ¦µÄÇø¿éÒÑ¾­·ÅÈëµ½Ö÷Á´ÖĞ£¬Ôò¶ÔÓ¦µÄÇø¿é½»Ò×Ó¦¸ÃÒª´Ó±¾½Úµã±£´æµÄ½»Ò×ÄÚ´æ³ØÖĞÉ¾³ı
+unsigned int nTransactionsUpdated = 0; // æ¯æ¬¡å¯¹mapTransactionsä¸­äº¤æ˜“è¿›è¡Œæ›´æ–°ï¼Œéƒ½å¯¹è¯¥å­—æ®µè¿›è¡Œ++æ“ä½œ
+map<COutPoint, CInPoint> mapNextTx;// å¦‚æœå¯¹åº”çš„åŒºå—å·²ç»æ”¾å…¥åˆ°ä¸»é“¾ä¸­ï¼Œåˆ™å¯¹åº”çš„åŒºå—äº¤æ˜“åº”è¯¥è¦ä»æœ¬èŠ‚ç‚¹ä¿å­˜çš„äº¤æ˜“å†…å­˜æ± ä¸­åˆ é™¤
 
-map<uint256, CBlockIndex*> mapBlockIndex; // ¿éË÷ÒıĞÅÏ¢£ºÆäÖĞkey¶ÔÓ¦µÄblockµÄhashÖµ
+map<uint256, CBlockIndex*> mapBlockIndex; // å—ç´¢å¼•ä¿¡æ¯ï¼šå…¶ä¸­keyå¯¹åº”çš„blockçš„hashå€¼
 const uint256 hashGenesisBlock("0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-CBlockIndex* pindexGenesisBlock = NULL; // »ù´¡¿é¶ÔÓ¦µÄË÷Òı£¬Ò²¼´ÊÇ´´ÊÀÇø¿é¶ÔÓ¦µÄË÷Òı
-int nBestHeight = -1; // ×î³¤Á´¶ÔÓ¦µÄÇø¿é¸öÊı£¬´Ó´´ÊÀÇø¿éµ½µ±Ç°Ö÷Á´×îºóÒ»¸öÇø¿é£¬ÖĞ¼ä¸ôÁË¶àÉÙ¸öÇø¿é
-uint256 hashBestChain = 0; // ×î³¤Á´×îºóÒ»¸öÇø¿é¶ÔÓ¦µÄhash
-CBlockIndex* pindexBest = NULL; // ¼ÇÂ¼µ±Ç°×î³¤Á´Ö÷Á´¶ÔÓ¦µÄÇø¿éË÷ÒıÖ¸Õë
+CBlockIndex* pindexGenesisBlock = NULL; // åŸºç¡€å—å¯¹åº”çš„ç´¢å¼•ï¼Œä¹Ÿå³æ˜¯åˆ›ä¸–åŒºå—å¯¹åº”çš„ç´¢å¼•
+int nBestHeight = -1; // æœ€é•¿é“¾å¯¹åº”çš„åŒºå—ä¸ªæ•°ï¼Œä»åˆ›ä¸–åŒºå—åˆ°å½“å‰ä¸»é“¾æœ€åä¸€ä¸ªåŒºå—ï¼Œä¸­é—´éš”äº†å¤šå°‘ä¸ªåŒºå—
+uint256 hashBestChain = 0; // æœ€é•¿é“¾æœ€åä¸€ä¸ªåŒºå—å¯¹åº”çš„hash
+CBlockIndex* pindexBest = NULL; // è®°å½•å½“å‰æœ€é•¿é“¾ä¸»é“¾å¯¹åº”çš„åŒºå—ç´¢å¼•æŒ‡é’ˆ
 
-map<uint256, CBlock*> mapOrphanBlocks; // ¹Â¶ù¿émap
-multimap<uint256, CBlock*> mapOrphanBlocksByPrev; // ¹Â¶ù¿éµÄ¸¸Çø¿ì£¨Î´½ÓÊÕµ½µÄ£©
+map<uint256, CBlock*> mapOrphanBlocks; // å­¤å„¿å—map
+multimap<uint256, CBlock*> mapOrphanBlocksByPrev; // å­¤å„¿å—çš„çˆ¶åŒºå¿«ï¼ˆæœªæ¥æ”¶åˆ°çš„ï¼‰
 
-map<uint256, CDataStream*> mapOrphanTransactions;// ¹Â¶ù½»Ò×£¬ÆäÖĞkey¶ÔÓ¦µÄ½»Ò×hashÖµ
-multimap<uint256, CDataStream*> mapOrphanTransactionsByPrev; // ÆäÖĞkeyÎªvalue½»Ò×¶ÔÓ¦ÊäÈëµÄ½»Ò×µÄhashÖµ£¬valueÎªµ±Ç°½»Ò×
+map<uint256, CDataStream*> mapOrphanTransactions;// å­¤å„¿äº¤æ˜“ï¼Œå…¶ä¸­keyå¯¹åº”çš„äº¤æ˜“hashå€¼
+multimap<uint256, CDataStream*> mapOrphanTransactionsByPrev; // å…¶ä¸­keyä¸ºvalueäº¤æ˜“å¯¹åº”è¾“å…¥çš„äº¤æ˜“çš„hashå€¼ï¼Œvalueä¸ºå½“å‰äº¤æ˜“
 
-map<uint256, CWalletTx> mapWallet; // Ç®°ü½»Ò×¶ÔÓ¦µÄmap£¬ÆäÖĞkey¶ÔÓ¦µÄÇ®°ü½»Ò×µÄhashÖµ£¬mapWallet½ö½ö´æ·ÅºÍ±¾½ÚµãÏà¹ØµÄ½»Ò×
-vector<pair<uint256, bool> > vWalletUpdated; // Í¨ÖªUI£¬¶ÔÓ¦µÄhash·¢ÉúÁË¸Ä±ä
+map<uint256, CWalletTx> mapWallet; // é’±åŒ…äº¤æ˜“å¯¹åº”çš„mapï¼Œå…¶ä¸­keyå¯¹åº”çš„é’±åŒ…äº¤æ˜“çš„hashå€¼ï¼ŒmapWalletä»…ä»…å­˜æ”¾å’Œæœ¬èŠ‚ç‚¹ç›¸å…³çš„äº¤æ˜“
+vector<pair<uint256, bool> > vWalletUpdated; // é€šçŸ¥UIï¼Œå¯¹åº”çš„hashå‘ç”Ÿäº†æ”¹å˜
 CCriticalSection cs_mapWallet;
 
-map<vector<unsigned char>, CPrivKey> mapKeys; // ¹«Ô¿ºÍË½Ô¿¶ÔÓ¦µÄÓ³Éä¹ØÏµ£¬ÆäÖĞkeyÎª¹«Ô¿£¬valueÎªË½Ô¿
-map<uint160, vector<unsigned char> > mapPubKeys; // ¹«Ô¿µÄhashÖµºÍ¹«Ô¿µÄ¹ØÏµ£¬ÆäÖĞkeyÎª¹«Ô¿µÄhashÖµ£¬valueÎª¹«Ô¿
+map<vector<unsigned char>, CPrivKey> mapKeys; // å…¬é’¥å’Œç§é’¥å¯¹åº”çš„æ˜ å°„å…³ç³»ï¼Œå…¶ä¸­keyä¸ºå…¬é’¥ï¼Œvalueä¸ºç§é’¥
+map<uint160, vector<unsigned char> > mapPubKeys; // å…¬é’¥çš„hashå€¼å’Œå…¬é’¥çš„å…³ç³»ï¼Œå…¶ä¸­keyä¸ºå…¬é’¥çš„hashå€¼ï¼Œvalueä¸ºå…¬é’¥
 CCriticalSection cs_mapKeys;
-CKey keyUser; // µ±Ç°ÓÃ»§¹«Ë½Ô¿¶ÔĞÅÏ¢
+CKey keyUser; // å½“å‰ç”¨æˆ·å…¬ç§é’¥å¯¹ä¿¡æ¯
 
 string strSetDataDir;
-int nDropMessagesTest = 0; // ÏûÏ¢²É¼¯µÄÆµÂÊ£¬¼´ÊÇ¶à¸öÉÙÏûÏ¢²É¼¯Ò»´Î½øĞĞ´¦Àí
+int nDropMessagesTest = 0; // æ¶ˆæ¯é‡‡é›†çš„é¢‘ç‡ï¼Œå³æ˜¯å¤šä¸ªå°‘æ¶ˆæ¯é‡‡é›†ä¸€æ¬¡è¿›è¡Œå¤„ç†
 
 // Settings
-int fGenerateBitcoins; // ÊÇ·ñÍÚ¿ó£¬²úÉú±ÈÌØ±Ò
-int64 nTransactionFee = 0; // ½»Ò×·ÑÓÃ
+int fGenerateBitcoins; // æ˜¯å¦æŒ–çŸ¿ï¼Œäº§ç”Ÿæ¯”ç‰¹å¸
+int64 nTransactionFee = 0; // äº¤æ˜“è´¹ç”¨
 CAddress addrIncoming;
 
 
@@ -61,7 +61,7 @@ CAddress addrIncoming;
 //
 // mapKeys
 //
-// ½«¶ÔÓ¦keyµÄĞÅÏ¢´æ·Åµ½¶ÔÓ¦µÄÈ«¾Ö±äÁ¿ÖĞ
+// å°†å¯¹åº”keyçš„ä¿¡æ¯å­˜æ”¾åˆ°å¯¹åº”çš„å…¨å±€å˜é‡ä¸­
 bool AddKey(const CKey& key)
 {
     CRITICAL_BLOCK(cs_mapKeys)
@@ -71,7 +71,7 @@ bool AddKey(const CKey& key)
     }
     return CWalletDB().WriteKey(key.GetPubKey(), key.GetPrivKey());
 }
-// ²úÉúĞÂµÄ¹«Ë½Ô¿¶Ô
+// äº§ç”Ÿæ–°çš„å…¬ç§é’¥å¯¹
 vector<unsigned char> GenerateNewKey()
 {
     CKey key;
@@ -88,7 +88,7 @@ vector<unsigned char> GenerateNewKey()
 //
 // mapWallet
 //
-// ½«µ±Ç°½»Ò×Ôö¼Óµ½Ç®°ümapWalletÖĞ£ºÎŞÔò²åÈë£¬ÓĞÔò¸üĞÂ£¬mapWallet½ö½ö´æ·ÅºÍ±¾½ÚµãÏà¹ØµÄ½»Ò×
+// å°†å½“å‰äº¤æ˜“å¢åŠ åˆ°é’±åŒ…mapWalletä¸­ï¼šæ— åˆ™æ’å…¥ï¼Œæœ‰åˆ™æ›´æ–°ï¼ŒmapWalletä»…ä»…å­˜æ”¾å’Œæœ¬èŠ‚ç‚¹ç›¸å…³çš„äº¤æ˜“
 bool AddToWallet(const CWalletTx& wtxIn)
 {
     uint256 hash = wtxIn.GetHash();
@@ -97,16 +97,16 @@ bool AddToWallet(const CWalletTx& wtxIn)
         // Inserts only if not already there, returns tx inserted or tx found
         pair<map<uint256, CWalletTx>::iterator, bool> ret = mapWallet.insert(make_pair(hash, wtxIn));
         CWalletTx& wtx = (*ret.first).second;
-        bool fInsertedNew = ret.second; // ÅĞ¶ÏÊÇ·ñÊÇĞÂ²åÈëµÄ£¨Ò²¼´ÊÇÔ­À´¶ÔÓ¦mapWalletÖĞÃ»ÓĞ£©
+        bool fInsertedNew = ret.second; // åˆ¤æ–­æ˜¯å¦æ˜¯æ–°æ’å…¥çš„ï¼ˆä¹Ÿå³æ˜¯åŸæ¥å¯¹åº”mapWalletä¸­æ²¡æœ‰ï¼‰
         if (fInsertedNew)
-            wtx.nTimeReceived = GetAdjustedTime(); // ½»Ò×±»½Úµã½ÓÊÕµÄÊ±¼ä
+            wtx.nTimeReceived = GetAdjustedTime(); // äº¤æ˜“è¢«èŠ‚ç‚¹æ¥æ”¶çš„æ—¶é—´
 
         //// debug print
         printf("AddToWallet %s  %s\n", wtxIn.GetHash().ToString().substr(0,6).c_str(), fInsertedNew ? "new" : "update");
 
         if (!fInsertedNew)
         {
-			// µ±Ç°½»Ò×ÒÑ¾­ÔÚmapWalletÖĞ´æÔÚ
+			// å½“å‰äº¤æ˜“å·²ç»åœ¨mapWalletä¸­å­˜åœ¨
             // Merge
             bool fUpdated = false;
             if (wtxIn.hashBlock != 0 && wtxIn.hashBlock != wtx.hashBlock)
@@ -147,7 +147,7 @@ bool AddToWallet(const CWalletTx& wtxIn)
     return true;
 }
 
-// Èç¹ûµ±Ç°½»Ò×ÊôÓÚ±¾½Úµã£¬Ôò½«µ±Ç°½»Ò×¼ÓÈëµ½Ç®°üÖĞ
+// å¦‚æœå½“å‰äº¤æ˜“å±äºæœ¬èŠ‚ç‚¹ï¼Œåˆ™å°†å½“å‰äº¤æ˜“åŠ å…¥åˆ°é’±åŒ…ä¸­
 bool AddToWalletIfMine(const CTransaction& tx, const CBlock* pblock)
 {
     if (tx.IsMine() || mapWallet.count(tx.GetHash()))
@@ -161,7 +161,7 @@ bool AddToWalletIfMine(const CTransaction& tx, const CBlock* pblock)
     return true;
 }
 
-// ½«½»Ò×´ÓÇ®°üÓ³Éä¶ÔÏómapWalletÖĞÒÆ³ı£¬Í¬Ê±½«½»Ò×´ÓCWalletDBÖĞÒÆ³ı
+// å°†äº¤æ˜“ä»é’±åŒ…æ˜ å°„å¯¹è±¡mapWalletä¸­ç§»é™¤ï¼ŒåŒæ—¶å°†äº¤æ˜“ä»CWalletDBä¸­ç§»é™¤
 bool EraseFromWallet(uint256 hash)
 {
     CRITICAL_BLOCK(cs_mapWallet)
@@ -184,7 +184,7 @@ bool EraseFromWallet(uint256 hash)
 //
 // mapOrphanTransactions
 //
-// Ôö¼Ó¹Â¶ù½»Ò×
+// å¢åŠ å­¤å„¿äº¤æ˜“
 void AddOrphanTx(const CDataStream& vMsg)
 {
     CTransaction tx;
@@ -193,11 +193,11 @@ void AddOrphanTx(const CDataStream& vMsg)
     if (mapOrphanTransactions.count(hash))
         return;
     CDataStream* pvMsg = mapOrphanTransactions[hash] = new CDataStream(vMsg);
-    // µ±Ç°½»Ò×¶ÔÓ¦µÄÊäÈë¶ÔÓ¦µÄ½»Ò×hash
+    // å½“å‰äº¤æ˜“å¯¹åº”çš„è¾“å…¥å¯¹åº”çš„äº¤æ˜“hash
     foreach(const CTxIn& txin, tx.vin)
         mapOrphanTransactionsByPrev.insert(make_pair(txin.prevout.hash, pvMsg));
 }
-// É¾³ı¶ÔÓ¦µÄ¹Â¶ù½»Ò×
+// åˆ é™¤å¯¹åº”çš„å­¤å„¿äº¤æ˜“
 void EraseOrphanTx(uint256 hash)
 {
     if (!mapOrphanTransactions.count(hash))
@@ -231,7 +231,7 @@ void EraseOrphanTx(uint256 hash)
 //
 // CTransaction
 //
-// ÅĞ¶Ïµ±Ç°½»Ò×ÊÇÊÇ·ñ¶ÔÓ¦±¾½ÚµãµÄ½»Ò×
+// åˆ¤æ–­å½“å‰äº¤æ˜“æ˜¯æ˜¯å¦å¯¹åº”æœ¬èŠ‚ç‚¹çš„äº¤æ˜“
 bool CTxIn::IsMine() const
 {
     CRITICAL_BLOCK(cs_mapWallet)
@@ -248,7 +248,7 @@ bool CTxIn::IsMine() const
     return false;
 }
 
-// »ñÈ¡µ±Ç°½Úµã¶ÔÓÚ´Ë±Ê½»Ò×¶ÔÓ¦µÄÊäÈë½ğ¶î£¬Èç¹ûÊäÈë¶ÔÓ¦µÄ²»ÊÇµ±Ç°½ÚµãÔò¶ÔÓ¦µÄ½è·½½ğ¶îÎª0
+// è·å–å½“å‰èŠ‚ç‚¹å¯¹äºæ­¤ç¬”äº¤æ˜“å¯¹åº”çš„è¾“å…¥é‡‘é¢ï¼Œå¦‚æœè¾“å…¥å¯¹åº”çš„ä¸æ˜¯å½“å‰èŠ‚ç‚¹åˆ™å¯¹åº”çš„å€Ÿæ–¹é‡‘é¢ä¸º0
 int64 CTxIn::GetDebit() const
 {
     CRITICAL_BLOCK(cs_mapWallet)
@@ -265,7 +265,7 @@ int64 CTxIn::GetDebit() const
     return 0;
 }
 
-// »ñÈ¡½»Ò×Ê±¼ä
+// è·å–äº¤æ˜“æ—¶é—´
 int64 CWalletTx::GetTxTime() const
 {
     if (!fTimeReceivedIsTxTime && hashBlock != 0)
@@ -288,7 +288,7 @@ int64 CWalletTx::GetTxTime() const
 
 
 
-// Èç¹û½»Ò×ÔÚ¶ÔÓ¦µÄÇø¿éÖĞ£¬ÔòÉèÖÃ½»Ò×¶ÔÓ¦µÄÄ¬¿Ë¶ûÊ÷·ÖÖ§
+// å¦‚æœäº¤æ˜“åœ¨å¯¹åº”çš„åŒºå—ä¸­ï¼Œåˆ™è®¾ç½®äº¤æ˜“å¯¹åº”çš„é»˜å…‹å°”æ ‘åˆ†æ”¯
 int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
 {
     if (fClient)
@@ -303,20 +303,20 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
         {
             // Load the block this tx is in
             CTxIndex txindex;
-			// ¸ù¾İµ±Ç°½»Ò×µÄhash´ÓÊı¾İ¿âÖĞ²éÕÒ¶ÔÓ¦µÄ½»Ò×Ë÷Òı
+			// æ ¹æ®å½“å‰äº¤æ˜“çš„hashä»æ•°æ®åº“ä¸­æŸ¥æ‰¾å¯¹åº”çš„äº¤æ˜“ç´¢å¼•
             if (!CTxDB("r").ReadTxIndex(GetHash(), txindex))
                 return 0;
-			// ¸ù¾İ½»Ò×Ë÷ÒıµÄĞÅÏ¢´ÓÊı¾İ¿âÖĞ²éÑ¯¶ÔÓ¦µÄblockĞÅÏ¢
+			// æ ¹æ®äº¤æ˜“ç´¢å¼•çš„ä¿¡æ¯ä»æ•°æ®åº“ä¸­æŸ¥è¯¢å¯¹åº”çš„blockä¿¡æ¯
             if (!blockTmp.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, true))
                 return 0;
             pblock = &blockTmp;
         }
 
-		// ¸ù¾İ½»Ò×¶ÔÓ¦µÄblockµÄhashÖµ
+		// æ ¹æ®äº¤æ˜“å¯¹åº”çš„blockçš„hashå€¼
         // Update the tx's hashBlock
         hashBlock = pblock->GetHash();
 
-		// ¶¨Î»µ±Ç°½»Ò×ÔÚblock¶ÔÓ¦µÄ½»Ò×ÁĞ±íÖĞµÄË÷Òı
+		// å®šä½å½“å‰äº¤æ˜“åœ¨blockå¯¹åº”çš„äº¤æ˜“åˆ—è¡¨ä¸­çš„ç´¢å¼•
         // Locate the transaction
         for (nIndex = 0; nIndex < pblock->vtx.size(); nIndex++)
             if (pblock->vtx[nIndex] == *(CTransaction*)this)
@@ -341,21 +341,21 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
     if (!pindex || !pindex->IsInMainChain())
         return 0;
 
-	// ·µ»Øµ±Ç°½»Ò×ÔÚÖ÷Á´ÖĞµÄ¸ß¶È£¨¼´ÊÇµ±Ç°blockÏà¶ÔÓÚÖ÷Á´Ä©Î²Ö®¼äÖĞ¼ä¸ôÁË¶àÉÙ¸öblock£©
+	// è¿”å›å½“å‰äº¤æ˜“åœ¨ä¸»é“¾ä¸­çš„é«˜åº¦ï¼ˆå³æ˜¯å½“å‰blockç›¸å¯¹äºä¸»é“¾æœ«å°¾ä¹‹é—´ä¸­é—´éš”äº†å¤šå°‘ä¸ªblockï¼‰
     return pindexBest->nHeight - pindex->nHeight + 1;
 }
 
 
-// Ôö¼ÓÖ§³ÖµÄ½»Ò×
+// å¢åŠ æ”¯æŒçš„äº¤æ˜“
 void CWalletTx::AddSupportingTransactions(CTxDB& txdb)
 {
     vtxPrev.clear();
 
     const int COPY_DEPTH = 3;
-	// Èç¹ûµ±Ç°½»Ò×ËùÔÚµÄblockºÍ×î³¤Á´Ä©Î²Ö®¼äµÄblockÊıÁ¿Ğ¡ÓÚ3
+	// å¦‚æœå½“å‰äº¤æ˜“æ‰€åœ¨çš„blockå’Œæœ€é•¿é“¾æœ«å°¾ä¹‹é—´çš„blockæ•°é‡å°äº3
     if (SetMerkleBranch() < COPY_DEPTH)
     {
-        vector<uint256> vWorkQueue;// ¶ÔÓ¦µ±Ç°½»Ò×ÊäÈë¶ÔÓ¦µÄ½»Ò×µÄhashÖµ
+        vector<uint256> vWorkQueue;// å¯¹åº”å½“å‰äº¤æ˜“è¾“å…¥å¯¹åº”çš„äº¤æ˜“çš„hashå€¼
         foreach(const CTxIn& txin, vin)
             vWorkQueue.push_back(txin.prevout.hash);
 
@@ -363,7 +363,7 @@ void CWalletTx::AddSupportingTransactions(CTxDB& txdb)
         CRITICAL_BLOCK(cs_mapWallet)
         {
             map<uint256, const CMerkleTx*> mapWalletPrev;
-            set<uint256> setAlreadyDone; // Í¬Ñù´æ·Å½»Ò×ÊäÈëµÄhash£¬´ú±íÒÑ¾­½øĞĞ¹ıÒÔÏÂ²Ù×÷ÁË
+            set<uint256> setAlreadyDone; // åŒæ ·å­˜æ”¾äº¤æ˜“è¾“å…¥çš„hashï¼Œä»£è¡¨å·²ç»è¿›è¡Œè¿‡ä»¥ä¸‹æ“ä½œäº†
             for (int i = 0; i < vWorkQueue.size(); i++)
             {
                 uint256 hash = vWorkQueue[i];
@@ -414,13 +414,13 @@ void CWalletTx::AddSupportingTransactions(CTxDB& txdb)
 
 
 
-// ÅĞ¶ÏÕâ±ß½»Ò×ÄÜ²»ÄÜ±»½ÓÊÜ£¬Èç¹ûÄÜ½ÓÊÜ½«¶ÔÓ¦µÄ½»Ò×·ÅÈëÈ«¾Ö±äÁ¿ÖĞmapTransactions£¬mapNextTxÖĞ
+// åˆ¤æ–­è¿™è¾¹äº¤æ˜“èƒ½ä¸èƒ½è¢«æ¥å—ï¼Œå¦‚æœèƒ½æ¥å—å°†å¯¹åº”çš„äº¤æ˜“æ”¾å…¥å…¨å±€å˜é‡ä¸­mapTransactionsï¼ŒmapNextTxä¸­
 bool CTransaction::AcceptTransaction(CTxDB& txdb, bool fCheckInputs, bool* pfMissingInputs)
 {
     if (pfMissingInputs)
         *pfMissingInputs = false;
 
-	// ±Ò»ù½»Ò×½ö½öÔÚ¿éÖĞÓĞĞ§£¬±Ò»ù½»Ò×²»ÄÜ×öÎªÒ»¸öµ¥¶ÀµÄ½»Ò×
+	// å¸åŸºäº¤æ˜“ä»…ä»…åœ¨å—ä¸­æœ‰æ•ˆï¼Œå¸åŸºäº¤æ˜“ä¸èƒ½åšä¸ºä¸€ä¸ªå•ç‹¬çš„äº¤æ˜“
     // Coinbase is only valid in a block, not as a loose transaction
     if (IsCoinBase())
         return error("AcceptTransaction() : coinbase as individual tx");
@@ -428,37 +428,37 @@ bool CTransaction::AcceptTransaction(CTxDB& txdb, bool fCheckInputs, bool* pfMis
     if (!CheckTransaction())
         return error("AcceptTransaction() : CheckTransaction failed");
 
-	// ÅĞ¶Ïµ±Ç°½»Ò×ÊÇ·ñÎÒÃÇÒÑ¾­½ÓÊÕµ½¹ıÁË
+	// åˆ¤æ–­å½“å‰äº¤æ˜“æ˜¯å¦æˆ‘ä»¬å·²ç»æ¥æ”¶åˆ°è¿‡äº†
     // Do we already have it?
     uint256 hash = GetHash();
     CRITICAL_BLOCK(cs_mapTransactions)
-        if (mapTransactions.count(hash)) // ÅĞ¶ÏÄÚ´æ¶ÔÏómapÖĞÊÇ·ñÒÑ¾­´æÔÚ
+        if (mapTransactions.count(hash)) // åˆ¤æ–­å†…å­˜å¯¹è±¡mapä¸­æ˜¯å¦å·²ç»å­˜åœ¨
             return false;
     if (fCheckInputs)
-        if (txdb.ContainsTx(hash)) // ÅĞ¶Ï½»Ò×dbÖĞÊÇ·ñÒÑ¾­´æÔÚ
+        if (txdb.ContainsTx(hash)) // åˆ¤æ–­äº¤æ˜“dbä¸­æ˜¯å¦å·²ç»å­˜åœ¨
             return false;
 
-	// ÅĞ¶Ïµ±Ç°½»Ò×¶ÔÏóÊÇ·ñºÍÄÚ´æÖĞµÄ½»Ò×¶ÔÏóÁĞ±í³åÍ»
+	// åˆ¤æ–­å½“å‰äº¤æ˜“å¯¹è±¡æ˜¯å¦å’Œå†…å­˜ä¸­çš„äº¤æ˜“å¯¹è±¡åˆ—è¡¨å†²çª
     // Check for conflicts with in-memory transactions
     CTransaction* ptxOld = NULL;
     for (int i = 0; i < vin.size(); i++)
     {
         COutPoint outpoint = vin[i].prevout;
-		// ¸ù¾İµ±Ç°½»Ò×¶ÔÓ¦µÄÊäÈë½»Ò×£¬»ñµÃ¶ÔÓ¦ÊäÈë½»Ò×¶ÔÓ¦µÄÊä³ö½»Ò×
+		// æ ¹æ®å½“å‰äº¤æ˜“å¯¹åº”çš„è¾“å…¥äº¤æ˜“ï¼Œè·å¾—å¯¹åº”è¾“å…¥äº¤æ˜“å¯¹åº”çš„è¾“å‡ºäº¤æ˜“
         if (mapNextTx.count(outpoint))
         {
             // Allow replacing with a newer version of the same transaction
-			// i ==0 Îªcoinbase£¬Ò²¾ÍÊÇcoinbase¿ÉÒÔÌæ»»
+			// i ==0 ä¸ºcoinbaseï¼Œä¹Ÿå°±æ˜¯coinbaseå¯ä»¥æ›¿æ¢
             if (i != 0)
                 return false;
-			// Ïà¶ÔÓÚµ±Ç°½»Ò×¸üÀÏµÄ½»Ò×
+			// ç›¸å¯¹äºå½“å‰äº¤æ˜“æ›´è€çš„äº¤æ˜“
             ptxOld = mapNextTx[outpoint].ptx;
-            if (!IsNewerThan(*ptxOld)) // ÅĞ¶ÏÊÇ·ñ±ÈÔ­À´½»Ò×¸üĞÂ£¬Í¨¹ınSequencesÅĞ¶Ï
+            if (!IsNewerThan(*ptxOld)) // åˆ¤æ–­æ˜¯å¦æ¯”åŸæ¥äº¤æ˜“æ›´æ–°ï¼Œé€šè¿‡nSequencesåˆ¤æ–­
                 return false;
             for (int i = 0; i < vin.size(); i++)
             {
                 COutPoint outpoint = vin[i].prevout;
-				// µ±Ç°½»Ò×µÄÊäÈëÔÚÄÚ´æ¶ÔÏómapNextTx¶ÔÓ¦µÄÊä³öÈç¹û¶¼´æÔÚ£¬ÇÒ¶¼Ö¸ÏòÔ­À´ÀÏµÄ½»Ò×£¬Ôò½ÓÊÕ´Ë½»Ò×
+				// å½“å‰äº¤æ˜“çš„è¾“å…¥åœ¨å†…å­˜å¯¹è±¡mapNextTxå¯¹åº”çš„è¾“å‡ºå¦‚æœéƒ½å­˜åœ¨ï¼Œä¸”éƒ½æŒ‡å‘åŸæ¥è€çš„äº¤æ˜“ï¼Œåˆ™æ¥æ”¶æ­¤äº¤æ˜“
                 if (!mapNextTx.count(outpoint) || mapNextTx[outpoint].ptx != ptxOld)
                     return false;
             }
@@ -466,7 +466,7 @@ bool CTransaction::AcceptTransaction(CTxDB& txdb, bool fCheckInputs, bool* pfMis
         }
     }
 
-	// ¶ÔÇ°½»Ò×½øĞĞĞ£ÑéºÍÉèÖÃÇ°½»Ò×¶ÔÓ¦µÄÊä³öÎª»¨·Ñ±ê¼Ç
+	// å¯¹å‰äº¤æ˜“è¿›è¡Œæ ¡éªŒå’Œè®¾ç½®å‰äº¤æ˜“å¯¹åº”çš„è¾“å‡ºä¸ºèŠ±è´¹æ ‡è®°
     // Check against previous transactions
     map<uint256, CTxIndex> mapUnused;
     int64 nFees = 0;
@@ -477,7 +477,7 @@ bool CTransaction::AcceptTransaction(CTxDB& txdb, bool fCheckInputs, bool* pfMis
         return error("AcceptTransaction() : ConnectInputs failed %s", hash.ToString().substr(0,6).c_str());
     }
 
-	// ½«µ±Ç°½»Ò×´æ´¢ÔÚÄÚ´æ£¬Èç¹ûÀÏµÄ½»Ò×´æÔÚ£¬Ôò´ÓÄÚ´æÖĞ½«¶ÔÓ¦µÄ½»Ò×ÒÆ³ı
+	// å°†å½“å‰äº¤æ˜“å­˜å‚¨åœ¨å†…å­˜ï¼Œå¦‚æœè€çš„äº¤æ˜“å­˜åœ¨ï¼Œåˆ™ä»å†…å­˜ä¸­å°†å¯¹åº”çš„äº¤æ˜“ç§»é™¤
     // Store transaction in memory
     CRITICAL_BLOCK(cs_mapTransactions)
     {
@@ -486,22 +486,22 @@ bool CTransaction::AcceptTransaction(CTxDB& txdb, bool fCheckInputs, bool* pfMis
             printf("mapTransaction.erase(%s) replacing with new version\n", ptxOld->GetHash().ToString().c_str());
             mapTransactions.erase(ptxOld->GetHash());
         }
-		// ½«µ±Ç°½»Ò×´æ´¢µ½ÄÚ´æ¶ÔÏóÖĞ
+		// å°†å½“å‰äº¤æ˜“å­˜å‚¨åˆ°å†…å­˜å¯¹è±¡ä¸­
         AddToMemoryPool();
     }
 
-	// Èç¹ûÀÏµÄ½»Ò×´æÔÚ£¬Ôò´ÓÇ®°üÖĞ½«ÀÏµÄ½»Ò×ÒÆ³ı
+	// å¦‚æœè€çš„äº¤æ˜“å­˜åœ¨ï¼Œåˆ™ä»é’±åŒ…ä¸­å°†è€çš„äº¤æ˜“ç§»é™¤
     ///// are we sure this is ok when loading transactions or restoring block txes
     // If updated, erase old tx from wallet
     if (ptxOld)
-		// ½«½»Ò×´ÓÇ®°üÓ³Éä¶ÔÏómapWalletÖĞÒÆ³ı£¬Í¬Ê±½«½»Ò×´ÓCWalletDBÖĞÒÆ³ı
+		// å°†äº¤æ˜“ä»é’±åŒ…æ˜ å°„å¯¹è±¡mapWalletä¸­ç§»é™¤ï¼ŒåŒæ—¶å°†äº¤æ˜“ä»CWalletDBä¸­ç§»é™¤
         EraseFromWallet(ptxOld->GetHash());
 
     printf("AcceptTransaction(): accepted %s\n", hash.ToString().substr(0,6).c_str());
     return true;
 }
 
-// ½«µ±Ç°½»Ò×Ôö¼Óµ½ÄÚ´æ³ØmapTransactions,mapNextTxÖĞ£¬²¢ÇÒ¸üĞÂ½»Ò×¸üĞÂµÄ´ÎÊı
+// å°†å½“å‰äº¤æ˜“å¢åŠ åˆ°å†…å­˜æ± mapTransactions,mapNextTxä¸­ï¼Œå¹¶ä¸”æ›´æ–°äº¤æ˜“æ›´æ–°çš„æ¬¡æ•°
 bool CTransaction::AddToMemoryPool()
 {
     // Add to memory pool without checking anything.  Don't call this directly,
@@ -509,18 +509,18 @@ bool CTransaction::AddToMemoryPool()
     CRITICAL_BLOCK(cs_mapTransactions)
     {
         uint256 hash = GetHash();
-        mapTransactions[hash] = *this; // ½«µ±Ç°½»Ò×·ÅÈëµ½ÄÚ´æ¶ÔÏómapTransactionsÖĞ
-		// ¸üĞÂ»òÕßÉèÖÃ¶ÔÓ¦µÄmapNextTx ÊÇµÄ½»Ò×¶ÔÓ¦µÄÊäÈëµÄÊä³ö¶ÔÓ¦µÄÊÇ±¾½»Ò×
+        mapTransactions[hash] = *this; // å°†å½“å‰äº¤æ˜“æ”¾å…¥åˆ°å†…å­˜å¯¹è±¡mapTransactionsä¸­
+		// æ›´æ–°æˆ–è€…è®¾ç½®å¯¹åº”çš„mapNextTx æ˜¯çš„äº¤æ˜“å¯¹åº”çš„è¾“å…¥çš„è¾“å‡ºå¯¹åº”çš„æ˜¯æœ¬äº¤æ˜“
         for (int i = 0; i < vin.size(); i++)
             mapNextTx[vin[i].prevout] = CInPoint(&mapTransactions[hash], i);
 
-		// ¼ÇÂ¼½»Ò×±»¸üĞÂµÄ´ÎÊı
+		// è®°å½•äº¤æ˜“è¢«æ›´æ–°çš„æ¬¡æ•°
         nTransactionsUpdated++;
     }
     return true;
 }
 
-// ½«µ±Ç°½»Ò×´ÓÄÚ´æ¶ÔÏómapTransactions£¬mapNextTxÖĞÒÆ³ı£¬²¢ÇÒÔö¼Ó½»Ò×¶ÔÓ¦µÄ¸üĞÂ´ÎÊı
+// å°†å½“å‰äº¤æ˜“ä»å†…å­˜å¯¹è±¡mapTransactionsï¼ŒmapNextTxä¸­ç§»é™¤ï¼Œå¹¶ä¸”å¢åŠ äº¤æ˜“å¯¹åº”çš„æ›´æ–°æ¬¡æ•°
 bool CTransaction::RemoveFromMemoryPool()
 {
     // Remove transaction from memory pool
@@ -538,14 +538,14 @@ bool CTransaction::RemoveFromMemoryPool()
 
 
 
-// »ñÈ¡Ä¬¿Ë¶û½»Ò×ÔÚÖ÷Á´ÖĞµÄÉî¶È--µ±Ç°¿é¾àÀë×î³¤Á´Ä©Î²ÖĞ¼ä¸ôÁË¶àÉÙ¸öblock
+// è·å–é»˜å…‹å°”äº¤æ˜“åœ¨ä¸»é“¾ä¸­çš„æ·±åº¦--å½“å‰å—è·ç¦»æœ€é•¿é“¾æœ«å°¾ä¸­é—´éš”äº†å¤šå°‘ä¸ªblock
 int CMerkleTx::GetDepthInMainChain() const
 {
-	// ½»Ò×µÄ³õÊ¼»¯£¬»¹Ã»ÓĞ±»·ÅÈëblockÖĞ
+	// äº¤æ˜“çš„åˆå§‹åŒ–ï¼Œè¿˜æ²¡æœ‰è¢«æ”¾å…¥blockä¸­
     if (hashBlock == 0 || nIndex == -1)
         return 0;
 
-	// »ñÈ¡µ±Ç°½»Ò×ËùÔÚµÄblock£¬´ÓÄÚ´æ¶ÔÏómapBlockIndexÖĞ»ñÈ¡
+	// è·å–å½“å‰äº¤æ˜“æ‰€åœ¨çš„blockï¼Œä»å†…å­˜å¯¹è±¡mapBlockIndexä¸­è·å–
     // Find the block it claims to be in
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
     if (mi == mapBlockIndex.end())
@@ -554,11 +554,11 @@ int CMerkleTx::GetDepthInMainChain() const
     if (!pindex || !pindex->IsInMainChain())
         return 0;
 
-	// ±ê¼ÇÄ¬¿Ë¶û½»Ò×ÊÇ·ñÒÑ¾­Ğ£Ñé£¬Èç¹ûÃ»ÓĞĞ£ÑéÔò½øĞĞĞ£Ñé£¬Ğ£ÑéÖ®ºó½«Õâ¸öÖµÉèÎªtrue
+	// æ ‡è®°é»˜å…‹å°”äº¤æ˜“æ˜¯å¦å·²ç»æ ¡éªŒï¼Œå¦‚æœæ²¡æœ‰æ ¡éªŒåˆ™è¿›è¡Œæ ¡éªŒï¼Œæ ¡éªŒä¹‹åå°†è¿™ä¸ªå€¼è®¾ä¸ºtrue
     // Make sure the merkle branch connects to this block
     if (!fMerkleVerified)
     {
-		// ÅĞ¶Ï½»Ò×ÊÇ·ñÔÚblock¶ÔÓ¦µÄÄ¬¿Ë¶ûÊ÷ÖĞ
+		// åˆ¤æ–­äº¤æ˜“æ˜¯å¦åœ¨blockå¯¹åº”çš„é»˜å…‹å°”æ ‘ä¸­
         if (CBlock::CheckMerkleBranch(GetHash(), vMerkleBranch, nIndex) != pindex->hashMerkleRoot)
             return 0;
         fMerkleVerified = true;
@@ -567,8 +567,8 @@ int CMerkleTx::GetDepthInMainChain() const
     return pindexBest->nHeight - pindex->nHeight + 1;
 }
 
-// ÅĞ¶Ï¶ÔÓ¦µÄ¿éÊÇ·ñ³ÉÊì£¬¼´ÊÇ±»ÆäËû¿ó¹¤Ëù½ÓÊÜÈÏ¿É£¬Èç¹ûÊÇ·Ç±Ò»ù½»Ò×¶ÔÓ¦µÄÎª¿é³ÉÊì¶ÈÎª0£¬·ñÔòÒª½øĞĞ¼ÆËã
-// ³ÉÊì¶ÈÔ½Ğ¡Ô½ºÃ£¬ËµÃ÷µ±Ç°½»Ò×±»ÈÏ¿ÉµÄ¶ÈÔ½¸ß
+// åˆ¤æ–­å¯¹åº”çš„å—æ˜¯å¦æˆç†Ÿï¼Œå³æ˜¯è¢«å…¶ä»–çŸ¿å·¥æ‰€æ¥å—è®¤å¯ï¼Œå¦‚æœæ˜¯éå¸åŸºäº¤æ˜“å¯¹åº”çš„ä¸ºå—æˆç†Ÿåº¦ä¸º0ï¼Œå¦åˆ™è¦è¿›è¡Œè®¡ç®—
+// æˆç†Ÿåº¦è¶Šå°è¶Šå¥½ï¼Œè¯´æ˜å½“å‰äº¤æ˜“è¢«è®¤å¯çš„åº¦è¶Šé«˜
 int CMerkleTx::GetBlocksToMaturity() const
 {
     if (!IsCoinBase())
@@ -592,7 +592,7 @@ bool CMerkleTx::AcceptTransaction(CTxDB& txdb, bool fCheckInputs)
 }
 
 
-// ÅĞ¶Ïµ±Ç°½»Ò×ÊÇ·ñÄÜ¹»±»½ÓÊÕ
+// åˆ¤æ–­å½“å‰äº¤æ˜“æ˜¯å¦èƒ½å¤Ÿè¢«æ¥æ”¶
 bool CWalletTx::AcceptWalletTransaction(CTxDB& txdb, bool fCheckInputs)
 {
     CRITICAL_BLOCK(cs_mapTransactions)
@@ -627,10 +627,10 @@ void ReacceptWalletTransactions()
     }
 }
 
-// Ç®°ü½»Ò×½øĞĞ×ª²¥
+// é’±åŒ…äº¤æ˜“è¿›è¡Œè½¬æ’­
 void CWalletTx::RelayWalletTransaction(CTxDB& txdb)
 {
-	// ¶ÔÓÚÄÇĞ©½»Ò×ËùÔÚblockµ½×î³¤Á´µÄblockÖ®¼äµÄ¾àÀëĞ¡ÓÚ3µÄĞèÒª¶ÔÕâĞ©½»Ò×½øĞĞ×ª²¥
+	// å¯¹äºé‚£äº›äº¤æ˜“æ‰€åœ¨blockåˆ°æœ€é•¿é“¾çš„blockä¹‹é—´çš„è·ç¦»å°äº3çš„éœ€è¦å¯¹è¿™äº›äº¤æ˜“è¿›è¡Œè½¬æ’­
     foreach(const CMerkleTx& tx, vtxPrev)
     {
         if (!tx.IsCoinBase())
@@ -651,11 +651,11 @@ void CWalletTx::RelayWalletTransaction(CTxDB& txdb)
     }
 }
 
-// ÔÚÏàÁ¬µÄ½ÚµãÖ®¼ä×ª²¥ÄÇĞ©µ½Ä¿Ç°ÎªÖ¹»¹Ã»ÓĞ½øÈëblockÖĞµÄÇ®°ü½»Ò×
+// åœ¨ç›¸è¿çš„èŠ‚ç‚¹ä¹‹é—´è½¬æ’­é‚£äº›åˆ°ç›®å‰ä¸ºæ­¢è¿˜æ²¡æœ‰è¿›å…¥blockä¸­çš„é’±åŒ…äº¤æ˜“
 void RelayWalletTransactions()
 {
     static int64 nLastTime;
-	// ×ª²¥Ç®°ü½»Ò×Ê±¼äµÄ¼ä¸ôÊÇ10·ÖÖÓ£¬Ğ¡ÓÚ10·ÖÖÓÔò²»½øĞĞ×ª²¥
+	// è½¬æ’­é’±åŒ…äº¤æ˜“æ—¶é—´çš„é—´éš”æ˜¯10åˆ†é’Ÿï¼Œå°äº10åˆ†é’Ÿåˆ™ä¸è¿›è¡Œè½¬æ’­
     if (GetTime() - nLastTime < 10 * 60)
         return;
     nLastTime = GetTime();
@@ -665,9 +665,9 @@ void RelayWalletTransactions()
     CTxDB txdb("r");
     CRITICAL_BLOCK(cs_mapWallet)
     {
-		// °´ÕÕÊ±¼ä£¨±»µ±Ç°½Úµã½ÓÊÕµÄÊ±¼ä£©Ë³Ğò¶ÔÇ®°üÖĞµÄ½»Ò×½øĞĞÅÅĞò
+		// æŒ‰ç…§æ—¶é—´ï¼ˆè¢«å½“å‰èŠ‚ç‚¹æ¥æ”¶çš„æ—¶é—´ï¼‰é¡ºåºå¯¹é’±åŒ…ä¸­çš„äº¤æ˜“è¿›è¡Œæ’åº
         // Sort them in chronological order
-        multimap<unsigned int, CWalletTx*> mapSorted;// Ä¬ÈÏÊÇ°´ÕÕunsigned int¶ÔÓ¦µÄÖµÉıĞòÅÅÁĞ£¬¼´ÊÇÔ½ÔçÊ±¼äÔ½¿¿Ç°
+        multimap<unsigned int, CWalletTx*> mapSorted;// é»˜è®¤æ˜¯æŒ‰ç…§unsigned intå¯¹åº”çš„å€¼å‡åºæ’åˆ—ï¼Œå³æ˜¯è¶Šæ—©æ—¶é—´è¶Šé å‰
         foreach(PAIRTYPE(const uint256, CWalletTx)& item, mapWallet)
         {
             CWalletTx& wtx = item.second;
@@ -676,7 +676,7 @@ void RelayWalletTransactions()
         foreach(PAIRTYPE(const unsigned int, CWalletTx*)& item, mapSorted)
         {
             CWalletTx& wtx = *item.second;
-			// Ç®°ü½»Ò×½øĞĞ×ª²¥
+			// é’±åŒ…äº¤æ˜“è¿›è¡Œè½¬æ’­
             wtx.RelayWalletTransaction(txdb);
         }
     }
@@ -695,12 +695,12 @@ void RelayWalletTransactions()
 //
 // CBlock and CBlockIndex
 //
-// ¸ù¾İÇø¿éË÷Òı´ÓÊı¾İ¿âÎÄ¼şÖĞ¶ÁÈ¡¶ÔÓ¦µÄÇø¿éĞÅÏ¢
+// æ ¹æ®åŒºå—ç´¢å¼•ä»æ•°æ®åº“æ–‡ä»¶ä¸­è¯»å–å¯¹åº”çš„åŒºå—ä¿¡æ¯
 bool CBlock::ReadFromDisk(const CBlockIndex* pblockindex, bool fReadTransactions)
 {
     return ReadFromDisk(pblockindex->nFile, pblockindex->nBlockPos, fReadTransactions);
 }
-// »ñÈ¡¹Â¶ù¿é¶ÔÓ¦µÄ¸ù
+// è·å–å­¤å„¿å—å¯¹åº”çš„æ ¹
 uint256 GetOrphanRoot(const CBlock* pblock)
 {
     // Work back to the first block in the orphan chain
@@ -709,64 +709,64 @@ uint256 GetOrphanRoot(const CBlock* pblock)
     return pblock->GetHash();
 }
 
-// »ñÈ¡Õâ¸öÇø¿é¶ÔÓ¦µÄ¼ÛÖµ£¨½±Àø+½»Ò×ÊÖĞø·Ñ£©
+// è·å–è¿™ä¸ªåŒºå—å¯¹åº”çš„ä»·å€¼ï¼ˆå¥–åŠ±+äº¤æ˜“æ‰‹ç»­è´¹ï¼‰
 int64 CBlock::GetBlockValue(int64 nFees) const
 {
-	// ²¹Ìù;½òÌù£¬³õÊ¼½±ÀøÊÇ50¸ö±ÈÌØ±Ò
+	// è¡¥è´´;æ´¥è´´ï¼Œåˆå§‹å¥–åŠ±æ˜¯50ä¸ªæ¯”ç‰¹å¸
     int64 nSubsidy = 50 * COIN;
 
-	// ½±ÀøÊÇÃ¿4Äê¼õÒ»°ë£¬×ÜÁ¿ÊÇ2100Íò
-	// nBestHeight ¿ÉÒÔÕâÑùÀí½âÃ¿²ú³ö210000¿éblockÔò¶ÔÓ¦µÄ½±Àø¼õ°ë£¬¶ø²úÉúÒ»¸öblockĞèÒª10·ÖÖÓ
-	// Ôò²úÉú210000¸öblockĞèÒªµÄÊ±¼äÊÇ 210000*10/(60*24*360)=4.0509...£¨Äê£© ½«½üÓÚÃ¿4Äê¼õÒ»°ë
+	// å¥–åŠ±æ˜¯æ¯4å¹´å‡ä¸€åŠï¼Œæ€»é‡æ˜¯2100ä¸‡
+	// nBestHeight å¯ä»¥è¿™æ ·ç†è§£æ¯äº§å‡º210000å—blockåˆ™å¯¹åº”çš„å¥–åŠ±å‡åŠï¼Œè€Œäº§ç”Ÿä¸€ä¸ªblockéœ€è¦10åˆ†é’Ÿ
+	// åˆ™äº§ç”Ÿ210000ä¸ªblockéœ€è¦çš„æ—¶é—´æ˜¯ 210000*10/(60*24*360)=4.0509...ï¼ˆå¹´ï¼‰ å°†è¿‘äºæ¯4å¹´å‡ä¸€åŠ
     // Subsidy is cut in half every 4 years
     nSubsidy >>= (nBestHeight / 210000);
 
     return nSubsidy + nFees;
 }
 
-// ¸ù¾İÇ°Ò»¸öblock¶ÔÓ¦µÄ¹¤×÷Á¿»ñÈ¡ÏÂÒ»¸öblock»ñÈ¡ĞèÒªµÄ¹¤×÷Á¿
+// æ ¹æ®å‰ä¸€ä¸ªblockå¯¹åº”çš„å·¥ä½œé‡è·å–ä¸‹ä¸€ä¸ªblockè·å–éœ€è¦çš„å·¥ä½œé‡
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast)
 {
     const unsigned int nTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-    const unsigned int nTargetSpacing = 10 * 60; // 10·ÖÖÓ²úÉúÒ»¸öblock
-	// Ã¿¸ô2016¸ö¿é¶ÔÓ¦µÄ¹¤×÷Á¿ÄÑ¶È¾ÍĞèÒªÖØĞÂ¼ÆËãÒ»´Î
-    const unsigned int nInterval = nTargetTimespan / nTargetSpacing; // ÖĞ¼ä¸ôÁË¶àÉÙ¸öblock 2016¸ö¿é
+    const unsigned int nTargetSpacing = 10 * 60; // 10åˆ†é’Ÿäº§ç”Ÿä¸€ä¸ªblock
+	// æ¯éš”2016ä¸ªå—å¯¹åº”çš„å·¥ä½œé‡éš¾åº¦å°±éœ€è¦é‡æ–°è®¡ç®—ä¸€æ¬¡
+    const unsigned int nInterval = nTargetTimespan / nTargetSpacing; // ä¸­é—´éš”äº†å¤šå°‘ä¸ªblock 2016ä¸ªå—
 
-	// ËµÃ÷µ±Ç°¿éÊÇÒ»¸ö´´ÊÀÇø¿é£¬ÒòÎªµ±Ç°¿é¶ÔÓ¦µÄÇ°Ò»¸öÇø¿éÎª¿Õ
+	// è¯´æ˜å½“å‰å—æ˜¯ä¸€ä¸ªåˆ›ä¸–åŒºå—ï¼Œå› ä¸ºå½“å‰å—å¯¹åº”çš„å‰ä¸€ä¸ªåŒºå—ä¸ºç©º
     // Genesis block
     if (pindexLast == NULL)
         return bnProofOfWorkLimit.GetCompact();
 
-	// Èç¹û²»µÈÓÚ0²»½øĞĞ¹¤×÷Á¿ÄÑ¶È¸Ä±ä
+	// å¦‚æœä¸ç­‰äº0ä¸è¿›è¡Œå·¥ä½œé‡éš¾åº¦æ”¹å˜
     // Only change once per interval
     if ((pindexLast->nHeight+1) % nInterval != 0)
         return pindexLast->nBits;
 
-	// ÍùÇ°ÍÆ2016¸öÇø¿é
+	// å¾€å‰æ¨2016ä¸ªåŒºå—
     // Go back by what we want to be 14 days worth of blocks
     const CBlockIndex* pindexFirst = pindexLast;
     for (int i = 0; pindexFirst && i < nInterval-1; i++)
         pindexFirst = pindexFirst->pprev;
     assert(pindexFirst);
 
-	// µ±Ç°Çø¿éµÄÇ°Ò»¸öÇø¿é´´½¨Ê±¼ä ¼õÈ¥ ´Óµ±Ç°Çø¿éÏòÇ°ÍÆ2016¸öÇø¿éµÃµ½Çø¿é´´½¨Ê±¼ä
+	// å½“å‰åŒºå—çš„å‰ä¸€ä¸ªåŒºå—åˆ›å»ºæ—¶é—´ å‡å» ä»å½“å‰åŒºå—å‘å‰æ¨2016ä¸ªåŒºå—å¾—åˆ°åŒºå—åˆ›å»ºæ—¶é—´
     // Limit adjustment step
     unsigned int nActualTimespan = pindexLast->nTime - pindexFirst->nTime;
     printf("  nActualTimespan = %d  before bounds\n", nActualTimespan);
-    // ¿ØÖÆÄ¿±êÄÑ¶Èµ÷ÕûµÄ¿ç¶È²»ÄÜÌ«´óÒ²²»ÄÜÌ«Ğ¡
+    // æ§åˆ¶ç›®æ ‡éš¾åº¦è°ƒæ•´çš„è·¨åº¦ä¸èƒ½å¤ªå¤§ä¹Ÿä¸èƒ½å¤ªå°
 	if (nActualTimespan < nTargetTimespan/4)
         nActualTimespan = nTargetTimespan/4;
     if (nActualTimespan > nTargetTimespan*4)
         nActualTimespan = nTargetTimespan*4;
 
-	// ÖØĞÂ¼ÆËãÄÑ¶È£ºµ±Ç°Çø¿é¶ÔÓ¦µÄÇ°Ò»¸öÇø¿é¶ÔÓ¦µÄÄ¿±êÄÑ¶È * Êµ¼Ê2016Çø¿é¶ÔÓ¦µÄ´´½¨Ê±¼ä¼ä¸ô / Ä¿±êÊ±¼ä¿ç¶È14Ìì
+	// é‡æ–°è®¡ç®—éš¾åº¦ï¼šå½“å‰åŒºå—å¯¹åº”çš„å‰ä¸€ä¸ªåŒºå—å¯¹åº”çš„ç›®æ ‡éš¾åº¦ * å®é™…2016åŒºå—å¯¹åº”çš„åˆ›å»ºæ—¶é—´é—´éš” / ç›®æ ‡æ—¶é—´è·¨åº¦14å¤©
     // Retarget
     CBigNum bnNew;
     bnNew.SetCompact(pindexLast->nBits);
     bnNew *= nActualTimespan;
     bnNew /= nTargetTimespan;
 
-	// Èç¹û¼ÆËãµÄ¹¤×÷Á¿ÄÑ¶È£¨ÖµÔ½´ó¶ÔÓ¦µÄ¹¤×÷ÄÑ¶ÈÔ½Ğ¡£©Ğ¡ÓÚµ±Ç°¶ÔÓ¦µÄ¹¤×÷Á¿ÄÑ¶È
+	// å¦‚æœè®¡ç®—çš„å·¥ä½œé‡éš¾åº¦ï¼ˆå€¼è¶Šå¤§å¯¹åº”çš„å·¥ä½œéš¾åº¦è¶Šå°ï¼‰å°äºå½“å‰å¯¹åº”çš„å·¥ä½œé‡éš¾åº¦
     if (bnNew > bnProofOfWorkLimit)
         bnNew = bnProofOfWorkLimit;
 
@@ -780,12 +780,12 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast)
 }
 
 
-// ¶Ï¿ªÁ¬½ÓÊäÈë£¬¾ÍÊÇÊÍ·Å½»Ò×¶ÔÓ¦µÄÊäÈëµÄÕ¼ÓÃ£º¼´ÊÇÊÍ·Å½»Ò×ÊäÈë¶ÔÓ¦µÄ½»Ò×Ë÷ÒıµÄ±ê¼ÇÕ¼ÓÃ
+// æ–­å¼€è¿æ¥è¾“å…¥ï¼Œå°±æ˜¯é‡Šæ”¾äº¤æ˜“å¯¹åº”çš„è¾“å…¥çš„å ç”¨ï¼šå³æ˜¯é‡Šæ”¾äº¤æ˜“è¾“å…¥å¯¹åº”çš„äº¤æ˜“ç´¢å¼•çš„æ ‡è®°å ç”¨
 bool CTransaction::DisconnectInputs(CTxDB& txdb)
 {
-	// ·ÅÆú»òÕßÈÃ³öÇ°Ò»¸ö½»Ò×¶ÔÓ¦µÄ»¨·Ñ±ê¼ÇÖ¸Õë
+	// æ”¾å¼ƒæˆ–è€…è®©å‡ºå‰ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„èŠ±è´¹æ ‡è®°æŒ‡é’ˆ
     // Relinquish previous transactions' spent pointers
-    if (!IsCoinBase()) // ±Ò»ù
+    if (!IsCoinBase()) // å¸åŸº
     {
         foreach(const CTxIn& txin, vin)
         {
@@ -793,7 +793,7 @@ bool CTransaction::DisconnectInputs(CTxDB& txdb)
 
             // Get prev txindex from disk
             CTxIndex txindex;
-			// ´ÓÊı¾İ¿âÖĞ¶ÁÈ¡¶ÔÓ¦µÄ½»Ò×µÄË÷Òı
+			// ä»æ•°æ®åº“ä¸­è¯»å–å¯¹åº”çš„äº¤æ˜“çš„ç´¢å¼•
             if (!txdb.ReadTxIndex(prevout.hash, txindex))
                 return error("DisconnectInputs() : ReadTxIndex failed");
 
@@ -808,7 +808,7 @@ bool CTransaction::DisconnectInputs(CTxDB& txdb)
         }
     }
 
-	// ½«µ±Ç°½»Ò×´Ó½»Ò×Ë÷Òı±íÖĞÒÆ³ı
+	// å°†å½“å‰äº¤æ˜“ä»äº¤æ˜“ç´¢å¼•è¡¨ä¸­ç§»é™¤
     // Remove transaction from index
     if (!txdb.EraseTxIndex(*this))
         return error("DisconnectInputs() : EraseTxPos failed");
@@ -816,10 +816,10 @@ bool CTransaction::DisconnectInputs(CTxDB& txdb)
     return true;
 }
 
-// ½»Ò×ÊäÈëÁ´½Ó£¬½«¶ÔÓ¦µÄ½»Ò×ÊäÈëÕ¼ÓÃ¶ÔÓ¦µÄ½»Ò×ÊäÈëµÄ»¨·Ñ±ê¼Ç
+// äº¤æ˜“è¾“å…¥é“¾æ¥ï¼Œå°†å¯¹åº”çš„äº¤æ˜“è¾“å…¥å ç”¨å¯¹åº”çš„äº¤æ˜“è¾“å…¥çš„èŠ±è´¹æ ‡è®°
 bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos posThisTx, int nHeight, int64& nFees, bool fBlock, bool fMiner, int64 nMinFee)
 {
-	// Õ¼ÓÃÇ°Ò»¸ö½»Ò×¶ÔÓ¦µÄ»¨·ÑÖ¸Õë
+	// å ç”¨å‰ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„èŠ±è´¹æŒ‡é’ˆ
     // Take over previous transactions' spent pointers
     if (!IsCoinBase())
     {
@@ -869,23 +869,23 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPoo
                 return error("ConnectInputs() : %s prevout.n out of range %d %d %d", GetHash().ToString().substr(0,6).c_str(), prevout.n, txPrev.vout.size(), txindex.vSpent.size());
 
             // If prev is coinbase, check that it's matured
-            // ´´±Ò½»Ò×Òª¾­¹ı100¸öÇø¿éºó²ÅÄÜ±»»¨·Ñ
+            // åˆ›å¸äº¤æ˜“è¦ç»è¿‡100ä¸ªåŒºå—åæ‰èƒ½è¢«èŠ±è´¹
             if (txPrev.IsCoinBase())
                 for (CBlockIndex* pindex = pindexBest; pindex && nBestHeight - pindex->nHeight < COINBASE_MATURITY-1; pindex = pindex->pprev)
                     if (pindex->nBlockPos == txindex.pos.nBlockPos && pindex->nFile == txindex.pos.nFile)
                         return error("ConnectInputs() : tried to spend coinbase at depth %d", nBestHeight - pindex->nHeight);
 
             // Verify signature
-            // ÑéÖ¤½»Ò×ÊÇ·ñÓĞĞ§
+            // éªŒè¯äº¤æ˜“æ˜¯å¦æœ‰æ•ˆ
             if (!VerifySignature(txPrev, *this, i))
                 return error("ConnectInputs() : %s VerifySignature failed", GetHash().ToString().substr(0,6).c_str());
 
             // Check for conflicts
-            // ¼ì²âÕâ¸ö½»Ò×ÓĞÃ»ÓĞ±»»¨·Ñ
+            // æ£€æµ‹è¿™ä¸ªäº¤æ˜“æœ‰æ²¡æœ‰è¢«èŠ±è´¹
             if (!txindex.vSpent[prevout.n].IsNull())
                 return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,6).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
 
-			// ±ê¼ÇÇ°Ò»¸ö½»Ò×¶ÔÓ¦µÄ½»Ò×Ë÷Òı¶ÔÓ¦µÄ»¨·Ñ±ê¼Ç
+			// æ ‡è®°å‰ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„äº¤æ˜“ç´¢å¼•å¯¹åº”çš„èŠ±è´¹æ ‡è®°
             // Mark outpoints as spent
             txindex.vSpent[prevout.n] = posThisTx;
 
@@ -915,7 +915,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPoo
     }
     else if (fMiner)
     {
-		// Èç¹ûÊÇ¿ó¹¤£¬½«¶ÔÓ¦µÄ½»Ò×·ÅÈë¶ÔÓ¦µÄ½»Ò×²âÊÔ³ØÖĞ
+		// å¦‚æœæ˜¯çŸ¿å·¥ï¼Œå°†å¯¹åº”çš„äº¤æ˜“æ”¾å…¥å¯¹åº”çš„äº¤æ˜“æµ‹è¯•æ± ä¸­
         // Add transaction to test pool
         mapTestPool[GetHash()] = CTxIndex(CDiskTxPos(1,1,1), vout.size());
     }
@@ -923,13 +923,13 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPoo
     return true;
 }
 
-// ¿Í»§¶ËÁ¬½ÓÊäÈë£¬¶Ô½»Ò×±¾Éí½øĞĞÑéÖ¤
+// å®¢æˆ·ç«¯è¿æ¥è¾“å…¥ï¼Œå¯¹äº¤æ˜“æœ¬èº«è¿›è¡ŒéªŒè¯
 bool CTransaction::ClientConnectInputs()
 {
     if (IsCoinBase())
         return false;
 
-	// Õ¼ÓÃÇ°Ò»¸ö½»Ò×¶ÔÓ¦µÄ»¨·Ñ±ê¼Ç
+	// å ç”¨å‰ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„èŠ±è´¹æ ‡è®°
     // Take over previous transactions' spent pointers
     CRITICAL_BLOCK(cs_mapTransactions)
     {
@@ -969,21 +969,21 @@ bool CTransaction::ClientConnectInputs()
 
 
 
-// ½«Ò»¸öÇø¿éblock¶Ï¿ªÁ¬½Ó£¨¾ÍÊÇÊÍ·ÅÇø¿é¶ÔÓ¦µÄĞÅÏ¢£¬Í¬Ê±ÊÍ·ÅÇø¿é¶ÔÓ¦µÄÇø¿éË÷Òı£©
+// å°†ä¸€ä¸ªåŒºå—blockæ–­å¼€è¿æ¥ï¼ˆå°±æ˜¯é‡Šæ”¾åŒºå—å¯¹åº”çš„ä¿¡æ¯ï¼ŒåŒæ—¶é‡Šæ”¾åŒºå—å¯¹åº”çš„åŒºå—ç´¢å¼•ï¼‰
 bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
 {
-	// ÄæĞòÊÍ·Å½»Ò×µÄÁ´½Ó
+	// é€†åºé‡Šæ”¾äº¤æ˜“çš„é“¾æ¥
     // Disconnect in reverse order
     for (int i = vtx.size()-1; i >= 0; i--)
         if (!vtx[i].DisconnectInputs(txdb))
             return false;
 
-	// ¸üĞÂÇø¿éË÷Òı
+	// æ›´æ–°åŒºå—ç´¢å¼•
     // Update block index on disk without changing it in memory.
     // The memory index structure will be changed after the db commits.
     if (pindex->pprev)
     {
-		// ½«µ±Ç°Çø¿éË÷Òı¶ÔÓ¦µÄÇ°Ò»¸öÇø¿éË÷ÒıµÄhashNextÖµÎª0£¬±íÊ¾½«µ±Ç°Çø¿éË÷Òı´ÓÇ°Ò»¸öÇø¿éË÷ÒıÁ´½ÓÉÏÈ¥³ı
+		// å°†å½“å‰åŒºå—ç´¢å¼•å¯¹åº”çš„å‰ä¸€ä¸ªåŒºå—ç´¢å¼•çš„hashNextå€¼ä¸º0ï¼Œè¡¨ç¤ºå°†å½“å‰åŒºå—ç´¢å¼•ä»å‰ä¸€ä¸ªåŒºå—ç´¢å¼•é“¾æ¥ä¸Šå»é™¤
         CDiskBlockIndex blockindexPrev(pindex->pprev);
         blockindexPrev.hashNext = 0;
         txdb.WriteBlockIndex(blockindexPrev);
@@ -992,7 +992,7 @@ bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
     return true;
 }
 
-// Çø¿éÁ´½Ó£ºÃ¿Ò»¸ö½»Ò×Á´½Ó£¬Ôö¼Óµ½Çø¿éË÷ÒıÁ´ÖĞ
+// åŒºå—é“¾æ¥ï¼šæ¯ä¸€ä¸ªäº¤æ˜“é“¾æ¥ï¼Œå¢åŠ åˆ°åŒºå—ç´¢å¼•é“¾ä¸­
 bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
 {
     //// issue here: it doesn't know the version
@@ -1004,11 +1004,11 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
     {
         CDiskTxPos posThisTx(pindex->nFile, pindex->nBlockPos, nTxPos);
         nTxPos += ::GetSerializeSize(tx, SER_DISK);
-		// ¶ÔÃ¿Ò»¸ö½»Ò×½øĞĞÊäÈëÁ´½ÓÅĞ¶Ï
+		// å¯¹æ¯ä¸€ä¸ªäº¤æ˜“è¿›è¡Œè¾“å…¥é“¾æ¥åˆ¤æ–­
         if (!tx.ConnectInputs(txdb, mapUnused, posThisTx, pindex->nHeight, nFees, true, false))
             return false;
     }
-	// ±Ò»ù½»Ò×ÖĞ¶ÔÓ¦µÄÊä³ö²»ÄÜ´óÓÚÕû¸ö¶ÔÓ¦µÄ½±Àø+½»Ò×ÊÖĞø·Ñ
+	// å¸åŸºäº¤æ˜“ä¸­å¯¹åº”çš„è¾“å‡ºä¸èƒ½å¤§äºæ•´ä¸ªå¯¹åº”çš„å¥–åŠ±+äº¤æ˜“æ‰‹ç»­è´¹
     if (vtx[0].GetValueOut() > GetBlockValue(nFees))
         return false;
 
@@ -1016,13 +1016,13 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
     // The memory index structure will be changed after the db commits.
     if (pindex->pprev)
     {
-		// ½«µ±Ç°Çø¿éË÷Òı ¹ÒÔÚ Ç°Ò»¸öÇø¿éË÷ÒıÖ®ºó
+		// å°†å½“å‰åŒºå—ç´¢å¼• æŒ‚åœ¨ å‰ä¸€ä¸ªåŒºå—ç´¢å¼•ä¹‹å
         CDiskBlockIndex blockindexPrev(pindex->pprev);
         blockindexPrev.hashNext = pindex->GetBlockHash();
         txdb.WriteBlockIndex(blockindexPrev);
     }
 
-	// ¼àÊÓÔÚblockÖĞÄÄĞ©
+	// ç›‘è§†åœ¨blockä¸­å“ªäº›
     // Watch for transactions paying to me
     foreach(CTransaction& tx, vtx)
         AddToWalletIfMine(tx, this);
@@ -1031,16 +1031,16 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex)
 }
 
 
-// ÖØĞÂÈ·¶¨Ö÷Á´£¬ÒòÎªÊÕµ½µÄ·Ö²æÁ´¸ß¶È´óÓÚµ±Ç°½ÚµãÈÏÎªµÄÖ÷Á´
+// é‡æ–°ç¡®å®šä¸»é“¾ï¼Œå› ä¸ºæ”¶åˆ°çš„åˆ†å‰é“¾é«˜åº¦å¤§äºå½“å‰èŠ‚ç‚¹è®¤ä¸ºçš„ä¸»é“¾
 bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
 {
     printf("*** REORGANIZE ***\n");
 
-	// ÕÒµ½Çø¿é·Ö²æµã
+	// æ‰¾åˆ°åŒºå—åˆ†å‰ç‚¹
     // Find the fork
     CBlockIndex* pfork = pindexBest;
     CBlockIndex* plonger = pindexNew;
-	// ÕÒµ½Ö÷Á´ºÍ·Ö²æÁ´¶ÔÓ¦µÄ½»²æµã
+	// æ‰¾åˆ°ä¸»é“¾å’Œåˆ†å‰é“¾å¯¹åº”çš„äº¤å‰ç‚¹
     while (pfork != plonger)
     {
         if (!(pfork = pfork->pprev))
@@ -1050,21 +1050,21 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
                 return error("Reorganize() : plonger->pprev is null");
     }
 
-	// ÁĞ¾Ù³öµ±Ç°½ÚµãÈÏÎªµÄ×î³¤Á´ÖĞ£¨´Óµ±Ç°×î³¤Á´µ½½»²æµã£©Ê§È¥Á¬½ÓµÄ¿é
+	// åˆ—ä¸¾å‡ºå½“å‰èŠ‚ç‚¹è®¤ä¸ºçš„æœ€é•¿é“¾ä¸­ï¼ˆä»å½“å‰æœ€é•¿é“¾åˆ°äº¤å‰ç‚¹ï¼‰å¤±å»è¿æ¥çš„å—
     // List of what to disconnect
     vector<CBlockIndex*> vDisconnect;
     for (CBlockIndex* pindex = pindexBest; pindex != pfork; pindex = pindex->pprev)
         vDisconnect.push_back(pindex);
 
-	// »ñÈ¡ĞèÒªÁ¬½ÓµÄ¿é£¬ÒòÎª×Ô¼ºÈÏÎªµÄ×î³¤Á´Êµ¼ÊÉÏ²»ÊÇ×î³¤Á´
+	// è·å–éœ€è¦è¿æ¥çš„å—ï¼Œå› ä¸ºè‡ªå·±è®¤ä¸ºçš„æœ€é•¿é“¾å®é™…ä¸Šä¸æ˜¯æœ€é•¿é“¾
     // List of what to connect
     vector<CBlockIndex*> vConnect;
     for (CBlockIndex* pindex = pindexNew; pindex != pfork; pindex = pindex->pprev)
         vConnect.push_back(pindex);
-	// ÒòÎªÉÏÃæ·ÅÈëµÄÊ±ºòÊÇµ¹×Å·ÅµÄ£¬ËùÒÔÕâÀïÔÚ½«Õâ¸öÄæĞò£¬µÃµ½ÕıÏòµÄ
+	// å› ä¸ºä¸Šé¢æ”¾å…¥çš„æ—¶å€™æ˜¯å€’ç€æ”¾çš„ï¼Œæ‰€ä»¥è¿™é‡Œåœ¨å°†è¿™ä¸ªé€†åºï¼Œå¾—åˆ°æ­£å‘çš„
     reverse(vConnect.begin(), vConnect.end());
 
-	// ÊÍ·Å¶ÏÁ´£¨½ö½öÊÍ·Å¶ÔÓ¦µÄblockÁ´£¬¶ÔÓ¦µÄblockË÷ÒıÁ´»¹Ã»ÓĞÊÍ·Å£©
+	// é‡Šæ”¾æ–­é“¾ï¼ˆä»…ä»…é‡Šæ”¾å¯¹åº”çš„blocké“¾ï¼Œå¯¹åº”çš„blockç´¢å¼•é“¾è¿˜æ²¡æœ‰é‡Šæ”¾ï¼‰
     // Disconnect shorter branch
     vector<CTransaction> vResurrect;
     foreach(CBlockIndex* pindex, vDisconnect)
@@ -1075,14 +1075,14 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
         if (!block.DisconnectBlock(txdb, pindex))
             return error("Reorganize() : DisconnectBlock failed");
 
-		// ½«ÊÍ·Å¿éÖĞµÄ½»Ò×·ÅÈëvResurrect£¬µÈ´ı¸´»î
+		// å°†é‡Šæ”¾å—ä¸­çš„äº¤æ˜“æ”¾å…¥vResurrectï¼Œç­‰å¾…å¤æ´»
         // Queue memory transactions to resurrect
         foreach(const CTransaction& tx, block.vtx)
             if (!tx.IsCoinBase())
                 vResurrect.push_back(tx);
     }
 
-	// Á¬½Ó×î³¤µÄ·ÖÖ§
+	// è¿æ¥æœ€é•¿çš„åˆ†æ”¯
     // Connect longer branch
     vector<CTransaction> vDelete;
     for (int i = 0; i < vConnect.size(); i++)
@@ -1093,7 +1093,7 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
             return error("Reorganize() : ReadFromDisk for connect failed");
         if (!block.ConnectBlock(txdb, pindex))
         {
-			// Èç¹ûblockÁ¬½ÓÊ§°ÜÖ®ºó£¬ËµÃ÷Õâ¸öblockÎŞĞ§£¬ÔòÉ¾³ıÕâ¿éÖ®ºóµÄ·ÖÖ§
+			// å¦‚æœblockè¿æ¥å¤±è´¥ä¹‹åï¼Œè¯´æ˜è¿™ä¸ªblockæ— æ•ˆï¼Œåˆ™åˆ é™¤è¿™å—ä¹‹åçš„åˆ†æ”¯
             // Invalid block, delete the rest of this branch
             txdb.TxnAbort();
             for (int j = i; j < vConnect.size(); j++)
@@ -1106,36 +1106,36 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
             }
             return error("Reorganize() : ConnectBlock failed");
         }
-		// ½«¼ÓÈëÇø¿éÁ´µÄ¿éÖĞµÄ½»Ò×´Ó¶ÔÓ¦µÄÄÚ´æÖĞÉ¾³ı
+		// å°†åŠ å…¥åŒºå—é“¾çš„å—ä¸­çš„äº¤æ˜“ä»å¯¹åº”çš„å†…å­˜ä¸­åˆ é™¤
         // Queue memory transactions to delete
         foreach(const CTransaction& tx, block.vtx)
             vDelete.push_back(tx);
     }
-	// Ğ´Èë×î³¤Á´
+	// å†™å…¥æœ€é•¿é“¾
     if (!txdb.WriteHashBestChain(pindexNew->GetBlockHash()))
         return error("Reorganize() : WriteHashBestChain failed");
 
-    // Commit now because resurrecting ¸´»îcould take some time
+    // Commit now because resurrecting å¤æ´»could take some time
     txdb.TxnCommit();
 
-	// ÊÍ·Å¶ÔÓ¦µÄ¿éË÷ÒıÁ´
+	// é‡Šæ”¾å¯¹åº”çš„å—ç´¢å¼•é“¾
     // Disconnect shorter branch
     foreach(CBlockIndex* pindex, vDisconnect)
         if (pindex->pprev)
-            pindex->pprev->pnext = NULL; // ±íÊ¾ÕâĞ©¿éÃ»ÓĞÔÚÖ÷Á´ÉÏ
+            pindex->pprev->pnext = NULL; // è¡¨ç¤ºè¿™äº›å—æ²¡æœ‰åœ¨ä¸»é“¾ä¸Š
 
-	// ĞÎ³ÉÒ»ÌõÖ÷Á´µÄ¿éË÷ÒıÁ´
+	// å½¢æˆä¸€æ¡ä¸»é“¾çš„å—ç´¢å¼•é“¾
     // Connect longer branch
     foreach(CBlockIndex* pindex, vConnect)
         if (pindex->pprev)
             pindex->pprev->pnext = pindex;
 
-	// ´ÓÊÍ·ÅÁ´½ÓµÄ·ÖÖ§ÖĞ»ñÈ¡¶ÔÓ¦µÄ½»Ò×£¬½«ÕâĞ©½»Ò×·ÅÈë¶ÔÓ¦µÄÈ«¾Ö±äÁ¿ÖĞµÃµ½¸´»î
+	// ä»é‡Šæ”¾é“¾æ¥çš„åˆ†æ”¯ä¸­è·å–å¯¹åº”çš„äº¤æ˜“ï¼Œå°†è¿™äº›äº¤æ˜“æ”¾å…¥å¯¹åº”çš„å…¨å±€å˜é‡ä¸­å¾—åˆ°å¤æ´»
     // Resurrect memory transactions that were in the disconnected branch
     foreach(CTransaction& tx, vResurrect)
         tx.AcceptTransaction(txdb, false);
 
-	// ´ÓÈ«¾Ö±äÁ¿ÖĞÉ¾³ıÄÇĞ©ÒÑ¾­ÔÚÖ÷Á´ÖĞµÄ½»Ò×
+	// ä»å…¨å±€å˜é‡ä¸­åˆ é™¤é‚£äº›å·²ç»åœ¨ä¸»é“¾ä¸­çš„äº¤æ˜“
     // Delete redundant memory transactions that are in the connected branch
     foreach(CTransaction& tx, vDelete)
         tx.RemoveFromMemoryPool();
@@ -1143,7 +1143,7 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
     return true;
 }
 
-// ½«µ±Ç°Çø¿éÔö¼Óµ½¶ÔÓ¦µÄÇø¿éË÷ÒıÁ´ÖĞmapBlockIndex
+// å°†å½“å‰åŒºå—å¢åŠ åˆ°å¯¹åº”çš„åŒºå—ç´¢å¼•é“¾ä¸­mapBlockIndex
 bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 {
     // Check for duplicate
@@ -1161,7 +1161,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     if (miPrev != mapBlockIndex.end())
     {
         pindexNew->pprev = (*miPrev).second;
-		// Ôö¼ÓÇ°Ò»¸öÇø¿éË÷Òı¶ÔÓ¦µÄ¸ß¶È
+		// å¢åŠ å‰ä¸€ä¸ªåŒºå—ç´¢å¼•å¯¹åº”çš„é«˜åº¦
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
     }
 
@@ -1169,12 +1169,12 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     txdb.TxnBegin();
     txdb.WriteBlockIndex(CDiskBlockIndex(pindexNew));
 
-	// ¸üĞÂ×î³¤Á´¶ÔÓ¦µÄÖ¸Õë
+	// æ›´æ–°æœ€é•¿é“¾å¯¹åº”çš„æŒ‡é’ˆ
     // New best
-	// ĞÂÁ´µÄ¸ß¶ÈÒÑ¾­³¬¹ıÖ÷Á´ÁË£¨¼´ÊÇĞÂÁ´µ½´´ÊÀÇø¿éµÄ³¤¶È ´óÓÚ ±¾½ÚµãÈÏÎªµÄ×î³¤Á´µ½´´ÊÀÇø¿éµÄ³¤¶È
+	// æ–°é“¾çš„é«˜åº¦å·²ç»è¶…è¿‡ä¸»é“¾äº†ï¼ˆå³æ˜¯æ–°é“¾åˆ°åˆ›ä¸–åŒºå—çš„é•¿åº¦ å¤§äº æœ¬èŠ‚ç‚¹è®¤ä¸ºçš„æœ€é•¿é“¾åˆ°åˆ›ä¸–åŒºå—çš„é•¿åº¦
     if (pindexNew->nHeight > nBestHeight)
     {
-		// ÅĞ¶ÏÊÇ·ñÊÇ´´ÊÀÇø¿é
+		// åˆ¤æ–­æ˜¯å¦æ˜¯åˆ›ä¸–åŒºå—
         if (pindexGenesisBlock == NULL && hash == hashGenesisBlock)
         {
             pindexGenesisBlock = pindexNew;
@@ -1182,7 +1182,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         }
         else if (hashPrevBlock == hashBestChain)
         {
-			// Èç¹ûµ±Ç°¿é¶ÔÓ¦µÄÇ°Ò»¸ö¿éÊÇ×î³¤µÄÁ´
+			// å¦‚æœå½“å‰å—å¯¹åº”çš„å‰ä¸€ä¸ªå—æ˜¯æœ€é•¿çš„é“¾
             // Adding to current best branch
             if (!ConnectBlock(txdb, pindexNew) || !txdb.WriteHashBestChain(hash))
             {
@@ -1193,18 +1193,18 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
                 return error("AddToBlockIndex() : ConnectBlock failed");
             }
             txdb.TxnCommit();
-			// Èç¹ûÔÚ×î³¤Á´ÖĞ£¬²ÅÉèÖÃ¶ÔÓ¦Çø¿éË÷ÒıµÄpnext×Ö¶Î£¬½«µ±Ç°Çø¿éË÷ÒıÉèÖÃÔÚÇ°Ò»¸öÇø¿éË÷ÒıµÄºóÃæ
+			// å¦‚æœåœ¨æœ€é•¿é“¾ä¸­ï¼Œæ‰è®¾ç½®å¯¹åº”åŒºå—ç´¢å¼•çš„pnextå­—æ®µï¼Œå°†å½“å‰åŒºå—ç´¢å¼•è®¾ç½®åœ¨å‰ä¸€ä¸ªåŒºå—ç´¢å¼•çš„åé¢
             pindexNew->pprev->pnext = pindexNew;
 
-			// Èç¹û¶ÔÓ¦µÄÇø¿éÒÑ¾­·ÅÈëµ½Ö÷Á´ÖĞ£¬Ôò¶ÔÓ¦µÄÇø¿é½»Ò×Ó¦¸ÃÒª´Ó±¾½Úµã±£´æµÄ½»Ò×ÄÚ´æ³ØÖĞÉ¾³ı
+			// å¦‚æœå¯¹åº”çš„åŒºå—å·²ç»æ”¾å…¥åˆ°ä¸»é“¾ä¸­ï¼Œåˆ™å¯¹åº”çš„åŒºå—äº¤æ˜“åº”è¯¥è¦ä»æœ¬èŠ‚ç‚¹ä¿å­˜çš„äº¤æ˜“å†…å­˜æ± ä¸­åˆ é™¤
             // Delete redundant memory transactions
             foreach(CTransaction& tx, vtx)
                 tx.RemoveFromMemoryPool();
         }
         else
         {
-			// µ±Ç°Çø¿é¼È²»ÊÇ´´ÊÀÇø¿é£¬ÇÒµ±Ç°Çø¿é¶ÔÓ¦µÄÇ°Ò»¸öÇø¿éÒ²²»ÔÚ×î³¤Ö÷Á´ÉÏµÄÇé¿ö
-			// ÔÙ¼ÓÉÏĞÂÇø¿éËùÔÚÁ´µÄ³¤¶È´óÓÚ±¾½ÚµãÈÏÎªÖ÷Á´µÄ³¤¶È£¬ËùÓĞ½«½øĞĞ·Ö²æ´¦Àí
+			// å½“å‰åŒºå—æ—¢ä¸æ˜¯åˆ›ä¸–åŒºå—ï¼Œä¸”å½“å‰åŒºå—å¯¹åº”çš„å‰ä¸€ä¸ªåŒºå—ä¹Ÿä¸åœ¨æœ€é•¿ä¸»é“¾ä¸Šçš„æƒ…å†µ
+			// å†åŠ ä¸Šæ–°åŒºå—æ‰€åœ¨é“¾çš„é•¿åº¦å¤§äºæœ¬èŠ‚ç‚¹è®¤ä¸ºä¸»é“¾çš„é•¿åº¦ï¼Œæ‰€æœ‰å°†è¿›è¡Œåˆ†å‰å¤„ç†
             // New best branch
             if (!Reorganize(txdb, pindexNew))
             {
@@ -1224,10 +1224,10 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     txdb.TxnCommit();
     txdb.Close();
 
-	// ×ª²¥ÄÇĞ©µ½Ä¿Ç°ÎªÖ¹»¹Ã»ÓĞ½øÈëblockÖĞµÄÇ®°ü½»Ò×
+	// è½¬æ’­é‚£äº›åˆ°ç›®å‰ä¸ºæ­¢è¿˜æ²¡æœ‰è¿›å…¥blockä¸­çš„é’±åŒ…äº¤æ˜“
     // Relay wallet transactions that haven't gotten in yet
     if (pindexNew == pindexBest)
-        RelayWalletTransactions();// ÔÚ½ÚµãÖ®¼ä½øĞĞ×ª²¥
+        RelayWalletTransactions();// åœ¨èŠ‚ç‚¹ä¹‹é—´è¿›è¡Œè½¬æ’­
 
     MainFrameRepaint();
     return true;
@@ -1235,22 +1235,22 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
 
 
 
-// Çø¿éĞ£Ñé
+// åŒºå—æ ¡éªŒ
 bool CBlock::CheckBlock() const
 {
     // These are checks that are independent of context
-    // that can be verified before saving an orphan ¹Â¶ù block.
+    // that can be verified before saving an orphan å­¤å„¿ block.
 
     // Size limits
     if (vtx.empty() || vtx.size() > MAX_SIZE || ::GetSerializeSize(*this, SER_DISK) > MAX_SIZE)
         return error("CheckBlock() : size limits failed");
 
-	// blockµÄ´´½¨Ê±¼ä Ïà¶ÔÓÚµ±Ç°Ê±¼ä ÔçÁË2¸öĞ¡Ê±
+	// blockçš„åˆ›å»ºæ—¶é—´ ç›¸å¯¹äºå½“å‰æ—¶é—´ æ—©äº†2ä¸ªå°æ—¶
     // Check timestamp
     if (nTime > GetAdjustedTime() + 2 * 60 * 60)
         return error("CheckBlock() : block timestamp too far in the future");
 
-	// ÔÚ¿éÖĞ±Ò»ù½»Ò×Ò»¶¨Òª´æÔÚ£¬¶øÇÒ½ö½öÖ»ÄÜ´æÔÚÒ»Ìõ
+	// åœ¨å—ä¸­å¸åŸºäº¤æ˜“ä¸€å®šè¦å­˜åœ¨ï¼Œè€Œä¸”ä»…ä»…åªèƒ½å­˜åœ¨ä¸€æ¡
     // First transaction must be coinbase, the rest must not be
     if (vtx.empty() || !vtx[0].IsCoinBase())
         return error("CheckBlock() : first tx is not coinbase");
@@ -1258,28 +1258,28 @@ bool CBlock::CheckBlock() const
         if (vtx[i].IsCoinBase())
             return error("CheckBlock() : more than one coinbase");
 
-	// ¶Ô¿éÖĞµÄ½»Ò×½øĞĞĞ£Ñé
+	// å¯¹å—ä¸­çš„äº¤æ˜“è¿›è¡Œæ ¡éªŒ
     // Check transactions
     foreach(const CTransaction& tx, vtx)
         if (!tx.CheckTransaction())
             return error("CheckBlock() : CheckTransaction failed");
 
-	// ¶Ô¹¤×÷Á¿ÄÑ¶ÈÖ¸±ê½øĞĞĞ£Ñé
+	// å¯¹å·¥ä½œé‡éš¾åº¦æŒ‡æ ‡è¿›è¡Œæ ¡éªŒ
     // Check proof of work matches claimed amount
     if (CBigNum().SetCompact(nBits) > bnProofOfWorkLimit)
         return error("CheckBlock() : nBits below minimum work");
-	// ¼ÆËãµ±Ç°¿éµÄhashÊÇ·ñÂú×ã¶ÔÓ¦¹¤×÷Á¿ÄÑ¶ÈÖ¸±ê
+	// è®¡ç®—å½“å‰å—çš„hashæ˜¯å¦æ»¡è¶³å¯¹åº”å·¥ä½œé‡éš¾åº¦æŒ‡æ ‡
     if (GetHash() > CBigNum().SetCompact(nBits).getuint256())
         return error("CheckBlock() : hash doesn't match nBits");
 
-	// ¶ÔÄ¬¿Ë¶ûÊ÷¶ÔÓ¦µÄ¸ù½øĞĞĞ£Ñé
+	// å¯¹é»˜å…‹å°”æ ‘å¯¹åº”çš„æ ¹è¿›è¡Œæ ¡éªŒ
     // Check merkleroot
     if (hashMerkleRoot != BuildMerkleTree())
         return error("CheckBlock() : hashMerkleRoot mismatch");
 
     return true;
 }
-// ÅĞ¶Ïµ±Ç°Çø¿éÄÜ¹»±»½ÓÊÕ
+// åˆ¤æ–­å½“å‰åŒºå—èƒ½å¤Ÿè¢«æ¥æ”¶
 bool CBlock::AcceptBlock()
 {
     // Check for duplicate
@@ -1293,12 +1293,12 @@ bool CBlock::AcceptBlock()
         return error("AcceptBlock() : prev block not found");
     CBlockIndex* pindexPrev = (*mi).second;
 
-	// µ±Ç°¿é´´½¨µÄÊ±¼äÒª´óÓÚÇ°Ò»¸ö¿é¶ÔÓ¦µÄÖĞÎ»ÊıÊ±¼ä
+	// å½“å‰å—åˆ›å»ºçš„æ—¶é—´è¦å¤§äºå‰ä¸€ä¸ªå—å¯¹åº”çš„ä¸­ä½æ•°æ—¶é—´
     // Check timestamp against prev
     if (nTime <= pindexPrev->GetMedianTimePast())
         return error("AcceptBlock() : block's timestamp is too early");
 
-	//¹¤×÷Á¿Ö¤Ã÷Ğ£Ñé£ºÃ¿Ò»¸ö½Úµã×Ô¼º¼ÆËã¶ÔÓ¦µÄ¹¤×÷Á¿ÄÑ¶È
+	//å·¥ä½œé‡è¯æ˜æ ¡éªŒï¼šæ¯ä¸€ä¸ªèŠ‚ç‚¹è‡ªå·±è®¡ç®—å¯¹åº”çš„å·¥ä½œé‡éš¾åº¦
     // Check proof of work
     if (nBits != GetNextWorkRequired(pindexPrev))
         return error("AcceptBlock() : incorrect proof of work");
@@ -1306,10 +1306,10 @@ bool CBlock::AcceptBlock()
     // Write block to history file
     unsigned int nFile;
     unsigned int nBlockPos;
-	// ½«¿éĞÅÏ¢Ğ´ÈëÎÄ¼şÖĞ
+	// å°†å—ä¿¡æ¯å†™å…¥æ–‡ä»¶ä¸­
     if (!WriteToDisk(!fClient, nFile, nBlockPos))
         return error("AcceptBlock() : WriteToDisk failed");
-	// Ôö¼Ó¿é¶ÔÓ¦µÄ¿ìË÷ÒıĞÅÏ¢
+	// å¢åŠ å—å¯¹åº”çš„å¿«ç´¢å¼•ä¿¡æ¯
     if (!AddToBlockIndex(nFile, nBlockPos))
         return error("AcceptBlock() : AddToBlockIndex failed");
 
@@ -1327,7 +1327,7 @@ bool CBlock::AcceptBlock()
 
     return true;
 }
-// ´¦ÀíÇø¿é£¬²»¹ÜÊÇ½ÓÊÕµ½µÄ»¹ÊÇ×Ô¼ºÍÚ¿óµÃµ½µÄ
+// å¤„ç†åŒºå—ï¼Œä¸ç®¡æ˜¯æ¥æ”¶åˆ°çš„è¿˜æ˜¯è‡ªå·±æŒ–çŸ¿å¾—åˆ°çš„
 bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 {
     // Check for duplicate
@@ -1337,7 +1337,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     if (mapOrphanBlocks.count(hash))
         return error("ProcessBlock() : already have block (orphan) %s", hash.ToString().substr(0,14).c_str());
 
-    // Preliminary checks ³õ²½Ğ£Ñé
+    // Preliminary checks åˆæ­¥æ ¡éªŒ
     if (!pblock->CheckBlock())
     {
         delete pblock;
@@ -1473,8 +1473,8 @@ string GetAppDir()
     return strDir;
 }
 
-// ´ò¿ª¿éÎÄ¼ş
-// ÖªµÀ¿éÎÄ¼ş¶ÔÓ¦nFileÖµ¾Í¿ÉÒÔÖªµÀÆä¶ÔÓ¦µÄÎÄ¼şÃû£ºblk${nFile}.dat
+// æ‰“å¼€å—æ–‡ä»¶
+// çŸ¥é“å—æ–‡ä»¶å¯¹åº”nFileå€¼å°±å¯ä»¥çŸ¥é“å…¶å¯¹åº”çš„æ–‡ä»¶åï¼šblk${nFile}.dat
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
 {
     if (nFile == -1)
@@ -1484,7 +1484,7 @@ FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszM
         return NULL;
     if (nBlockPos != 0 && !strchr(pszMode, 'a') && !strchr(pszMode, 'w'))
     {
-		// ÔÚÎÄ¼şÖĞ¸ù¾İ¿éµÄÆ«ÒÆ½øĞĞ¶¨Î»ÎÄ¼şÖ¸Õë
+		// åœ¨æ–‡ä»¶ä¸­æ ¹æ®å—çš„åç§»è¿›è¡Œå®šä½æ–‡ä»¶æŒ‡é’ˆ
         if (fseek(file, nBlockPos, SEEK_SET) != 0)
         {
             fclose(file);
@@ -1494,11 +1494,11 @@ FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszM
     return file;
 }
 
-// È«¾Ö¾²Ì¬±äÁ¿À´¿ØÖÆ¶ÔÓ¦µÄµ±Ç°block¶ÔÓ¦µÄÎÄ¼ş±àºÅ£¬Ò²¼´ÊÇÎÄ¼şÃû³Æ
-// Ã¿Ò»¸öblock¶ÔÓ¦Ò»¸öµ¥¶ÀµÄÎÄ¼ş
+// å…¨å±€é™æ€å˜é‡æ¥æ§åˆ¶å¯¹åº”çš„å½“å‰blockå¯¹åº”çš„æ–‡ä»¶ç¼–å·ï¼Œä¹Ÿå³æ˜¯æ–‡ä»¶åç§°
+// æ¯ä¸€ä¸ªblockå¯¹åº”ä¸€ä¸ªå•ç‹¬çš„æ–‡ä»¶
 static unsigned int nCurrentBlockFile = 1;
 
-// ·µ»Øµ±Ç°blockÓ¦¸ÃÔÚµÄÎÄ¼şÖ¸Õë
+// è¿”å›å½“å‰blockåº”è¯¥åœ¨çš„æ–‡ä»¶æŒ‡é’ˆ
 FILE* AppendBlockFile(unsigned int& nFileRet)
 {
     nFileRet = 0;
@@ -1691,7 +1691,7 @@ void PrintBlockTree()
 // Messages
 //
 
-// ÅĞ¶Ï¶ÔÓ¦µÄÇëÇóÏûÏ¢ÊÇ·ñÒÑ¾­´æÔÚ
+// åˆ¤æ–­å¯¹åº”çš„è¯·æ±‚æ¶ˆæ¯æ˜¯å¦å·²ç»å­˜åœ¨
 bool AlreadyHave(CTxDB& txdb, const CInv& inv)
 {
     switch (inv.type)
@@ -1710,7 +1710,7 @@ bool AlreadyHave(CTxDB& txdb, const CInv& inv)
 
 
 
-// ´¦Àíµ¥¸ö½Úµã¶ÔÓ¦µÄÏûÏ¢£ºµ¥¸ö½Úµã½ÓÊÕµ½µÄÏûÏ¢½øĞĞ´¦Àí
+// å¤„ç†å•ä¸ªèŠ‚ç‚¹å¯¹åº”çš„æ¶ˆæ¯ï¼šå•ä¸ªèŠ‚ç‚¹æ¥æ”¶åˆ°çš„æ¶ˆæ¯è¿›è¡Œå¤„ç†
 bool ProcessMessages(CNode* pfrom)
 {
     CDataStream& vRecv = pfrom->vRecv;
@@ -1718,20 +1718,20 @@ bool ProcessMessages(CNode* pfrom)
         return true;
     printf("ProcessMessages(%d bytes)\n", vRecv.size());
 
-    // Í¬Ò»¸öµÄÏûÏ¢¸ñÊ½
+    // åŒä¸€ä¸ªçš„æ¶ˆæ¯æ ¼å¼
     // Message format
     //  (4) message start
     //  (12) command
     //  (4) size
     //  (x) data
     //
-	// ÏûÏ¢Í·°üº¬£ºmessage start;command;size;
+	// æ¶ˆæ¯å¤´åŒ…å«ï¼šmessage start;command;size;
 
     loop
     {
         // Scan for message start
         CDataStream::iterator pstart = search(vRecv.begin(), vRecv.end(), BEGIN(pchMessageStart), END(pchMessageStart));
-        // É¾³ıÎŞĞ§µÄÏûÏ¢£º ¾ÍÊÇÔÚ¶ÔÓ¦µÄÏûÏ¢¿ªÊ¼Ç°Ãæ»¹ÓĞÒ»Ğ©ĞÅÏ¢
+        // åˆ é™¤æ— æ•ˆçš„æ¶ˆæ¯ï¼š å°±æ˜¯åœ¨å¯¹åº”çš„æ¶ˆæ¯å¼€å§‹å‰é¢è¿˜æœ‰ä¸€äº›ä¿¡æ¯
 	    if (vRecv.end() - pstart < sizeof(CMessageHeader))
         {
             if (vRecv.size() > sizeof(CMessageHeader))
@@ -1743,9 +1743,9 @@ bool ProcessMessages(CNode* pfrom)
         }
         if (pstart - vRecv.begin() > 0)
             printf("\n\nPROCESSMESSAGE SKIPPED %d BYTES\n\n", pstart - vRecv.begin());
-        vRecv.erase(vRecv.begin(), pstart); // ÒÆ³ıÏûÏ¢¿ªÊ¼ĞÅÏ¢ºÍ½ÓÊÕ»º³åÇø¿ªÍ·Ö®¼ä
+        vRecv.erase(vRecv.begin(), pstart); // ç§»é™¤æ¶ˆæ¯å¼€å§‹ä¿¡æ¯å’Œæ¥æ”¶ç¼“å†²åŒºå¼€å¤´ä¹‹é—´
 
-		// ¶ÁÈ¡ÏûÏ¢Í·
+		// è¯»å–æ¶ˆæ¯å¤´
         // Read header
         CMessageHeader hdr;
         vRecv >> hdr;
@@ -1778,7 +1778,7 @@ bool ProcessMessages(CNode* pfrom)
         {
             CheckForShutdown(2);
             CRITICAL_BLOCK(cs_main)
-				// ¸ù¾İÃüÁîºÍÏûÏ¢ÄÚÈİ½øĞĞÏûÏ¢´¦Àí
+				// æ ¹æ®å‘½ä»¤å’Œæ¶ˆæ¯å†…å®¹è¿›è¡Œæ¶ˆæ¯å¤„ç†
                 fRet = ProcessMessage(pfrom, strCommand, vMsg);
             CheckForShutdown(2);
         }
@@ -1793,51 +1793,51 @@ bool ProcessMessages(CNode* pfrom)
 
 
 
-// ¶Ô½ÚµãpFrom´¦ÀíÃüÁîstrCommand¶ÔÓ¦µÄÏûÏ¢ÄÚÈİÎªvRecv
+// å¯¹èŠ‚ç‚¹pFromå¤„ç†å‘½ä»¤strCommandå¯¹åº”çš„æ¶ˆæ¯å†…å®¹ä¸ºvRecv
 bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 {
     static map<unsigned int, vector<unsigned char> > mapReuseKey;
     printf("received: %-12s (%d bytes)  ", strCommand.c_str(), vRecv.size());
-	// ½ö½öÊä³öÇ°25¸ö×Ö·û
+	// ä»…ä»…è¾“å‡ºå‰25ä¸ªå­—ç¬¦
     for (int i = 0; i < min(vRecv.size(), (unsigned int)25); i++)
         printf("%02x ", vRecv[i] & 0xff);
     printf("\n");
-	// ÏûÏ¢²É¼¯ÆµÂÊ½øĞĞ´¦Àí
+	// æ¶ˆæ¯é‡‡é›†é¢‘ç‡è¿›è¡Œå¤„ç†
     if (nDropMessagesTest > 0 && GetRand(nDropMessagesTest) == 0)
     {
         printf("dropmessages DROPPING RECV MESSAGE\n");
         return true;
     }
 
-	// Èç¹ûÃüÁîÊÇ°æ±¾£º½Úµã¶ÔÓ¦µÄ°æ±¾
+	// å¦‚æœå‘½ä»¤æ˜¯ç‰ˆæœ¬ï¼šèŠ‚ç‚¹å¯¹åº”çš„ç‰ˆæœ¬
     if (strCommand == "version")
     {
-		// ½Úµã¶ÔÓ¦µÄ°æ±¾Ö»ÄÜ¸üĞÂÒ»´Î£¬³õÊ¼Îª0£¬ºóÃæ½øĞĞ¸üĞÂ
+		// èŠ‚ç‚¹å¯¹åº”çš„ç‰ˆæœ¬åªèƒ½æ›´æ–°ä¸€æ¬¡ï¼Œåˆå§‹ä¸º0ï¼Œåé¢è¿›è¡Œæ›´æ–°
         // Can only do this once
         if (pfrom->nVersion != 0)
             return false;
 
         int64 nTime;
-        CAddress addrMe; // ¶ÁÈ¡ÏûÏ¢¶ÔÓ¦µÄÄÚÈİ
+        CAddress addrMe; // è¯»å–æ¶ˆæ¯å¯¹åº”çš„å†…å®¹
         vRecv >> pfrom->nVersion >> pfrom->nServices >> nTime >> addrMe;
         if (pfrom->nVersion == 0)
             return false;
-		// ¸üĞÂ·¢ËÍºÍ½ÓÊÕ»º³åÇøÖĞµÄ¶ÔÓ¦µÄ°æ±¾
+		// æ›´æ–°å‘é€å’Œæ¥æ”¶ç¼“å†²åŒºä¸­çš„å¯¹åº”çš„ç‰ˆæœ¬
         pfrom->vSend.SetVersion(min(pfrom->nVersion, VERSION));
         pfrom->vRecv.SetVersion(min(pfrom->nVersion, VERSION));
 
-		// Èç¹û½Úµã¶ÔÓ¦µÄ·şÎñÀàĞÍÊÇ½ÚµãÍøÂç£¬Ôò¶ÔÓ¦½ÚµãµÄ¿Í»§¶Ë±ê¼Ç¾ÍÊÇfalse
+		// å¦‚æœèŠ‚ç‚¹å¯¹åº”çš„æœåŠ¡ç±»å‹æ˜¯èŠ‚ç‚¹ç½‘ç»œï¼Œåˆ™å¯¹åº”èŠ‚ç‚¹çš„å®¢æˆ·ç«¯æ ‡è®°å°±æ˜¯false
         pfrom->fClient = !(pfrom->nServices & NODE_NETWORK);
         if (pfrom->fClient)
         {
-			// Èç¹û²»ÊÇ½ÚµãÍøÂç£¬¿ÉÄÜ½ö½öÊÇÒ»Ğ©½Úµã²»Òª±£´æ¶ÔÓ¦µÄÍêÕûÇø¿éĞÅÏ¢£¬½ö½öĞèÒªÇø¿éµÄÍ·²¿½øĞĞĞ£Ñé¾Í¿ÉÒÔÁË
+			// å¦‚æœä¸æ˜¯èŠ‚ç‚¹ç½‘ç»œï¼Œå¯èƒ½ä»…ä»…æ˜¯ä¸€äº›èŠ‚ç‚¹ä¸è¦ä¿å­˜å¯¹åº”çš„å®Œæ•´åŒºå—ä¿¡æ¯ï¼Œä»…ä»…éœ€è¦åŒºå—çš„å¤´éƒ¨è¿›è¡Œæ ¡éªŒå°±å¯ä»¥äº†
             pfrom->vSend.nType |= SER_BLOCKHEADERONLY;
             pfrom->vRecv.nType |= SER_BLOCKHEADERONLY;
         }
-		// Ôö¼ÓÊ±¼äÑù±¾Êı¾İ£ºÃ»ÓĞÊ²Ã´ÓÃ´¦£¬½ö½öÓÃÓÚÊä³ö
+		// å¢åŠ æ—¶é—´æ ·æœ¬æ•°æ®ï¼šæ²¡æœ‰ä»€ä¹ˆç”¨å¤„ï¼Œä»…ä»…ç”¨äºè¾“å‡º
         AddTimeData(pfrom->addr.ip, nTime);
 
-		// ¶ÔµÚÒ»¸ö½øÀ´µÄ½ÚµãÇëÇóblockĞÅÏ¢
+		// å¯¹ç¬¬ä¸€ä¸ªè¿›æ¥çš„èŠ‚ç‚¹è¯·æ±‚blockä¿¡æ¯
         // Ask the first connected node for block updates
         static bool fAskedForBlocks;
         if (!fAskedForBlocks && !pfrom->fClient)
@@ -1852,12 +1852,12 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     else if (pfrom->nVersion == 0)
     {
-		// ½ÚµãÔÚ´¦ÀíÈÎºÎÏûÏ¢Ö®Ç°Ò»¶¨ÓĞÒ»¸ö°æ±¾ÏûÏ¢
+		// èŠ‚ç‚¹åœ¨å¤„ç†ä»»ä½•æ¶ˆæ¯ä¹‹å‰ä¸€å®šæœ‰ä¸€ä¸ªç‰ˆæœ¬æ¶ˆæ¯
         // Must have a version message before anything else
         return false;
     }
 
-	// ½ÓÊÕµØÖ·£¬²¢¹ã²¥µØÖ·
+	// æ¥æ”¶åœ°å€ï¼Œå¹¶å¹¿æ’­åœ°å€
     else if (strCommand == "addr")
     {
         vector<CAddress> vAddr;
@@ -1869,20 +1869,20 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         {
             if (fShutdown)
                 return true;
-			// ½«µØÖ·Ôö¼Óµ½Êı¾İ¿âÖĞ
+			// å°†åœ°å€å¢åŠ åˆ°æ•°æ®åº“ä¸­
             if (AddAddress(addrdb, addr))
             {
                 // Put on lists to send to other nodes
-                pfrom->setAddrKnown.insert(addr); // ½«¶ÔÓ¦µÄµØÖ·²åÈëµ½ÒÑÖªµØÖ·¼¯ºÏÖĞ
+                pfrom->setAddrKnown.insert(addr); // å°†å¯¹åº”çš„åœ°å€æ’å…¥åˆ°å·²çŸ¥åœ°å€é›†åˆä¸­
                 CRITICAL_BLOCK(cs_vNodes)
                     foreach(CNode* pnode, vNodes)
                         if (!pnode->setAddrKnown.count(addr))
-                            pnode->vAddrToSend.push_back(addr);// µØÖ·µÄ¹ã²¥
+                            pnode->vAddrToSend.push_back(addr);// åœ°å€çš„å¹¿æ’­
             }
         }
     }
 
-	// ¿â´æÏûÏ¢
+	// åº“å­˜æ¶ˆæ¯
     else if (strCommand == "inv")
     {
         vector<CInv> vInv;
@@ -1893,19 +1893,19 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         {
             if (fShutdown)
                 return true;
-            pfrom->AddInventoryKnown(inv); // ½«¶ÔÓ¦µÄ¿â´æ·¢ËÍÏûÏ¢Ôö¼Óµ½¿â´æ·¢ËÍÒÑÖªÖĞ
+            pfrom->AddInventoryKnown(inv); // å°†å¯¹åº”çš„åº“å­˜å‘é€æ¶ˆæ¯å¢åŠ åˆ°åº“å­˜å‘é€å·²çŸ¥ä¸­
 
             bool fAlreadyHave = AlreadyHave(txdb, inv);
             printf("  got inventory: %s  %s\n", inv.ToString().c_str(), fAlreadyHave ? "have" : "new");
 
             if (!fAlreadyHave)
-                pfrom->AskFor(inv);// Èç¹û²»´æÔÚ£¬ÔòÇëÇó×ÉÑ¯£¬ÕâÀï»áÔÚÏß³ÌÖĞ·¢ËÍgetdataÏûÏ¢
+                pfrom->AskFor(inv);// å¦‚æœä¸å­˜åœ¨ï¼Œåˆ™è¯·æ±‚å’¨è¯¢ï¼Œè¿™é‡Œä¼šåœ¨çº¿ç¨‹ä¸­å‘é€getdataæ¶ˆæ¯
             else if (inv.type == MSG_BLOCK && mapOrphanBlocks.count(inv.hash))
                 pfrom->PushMessage("getblocks", CBlockLocator(pindexBest), GetOrphanRoot(mapOrphanBlocks[inv.hash]));
         }
     }
 
-	// »ñÈ¡Êı¾İ
+	// è·å–æ•°æ®
     else if (strCommand == "getdata")
     {
         vector<CInv> vInv;
@@ -1926,7 +1926,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                     //// could optimize this to send header straight from blockindex for client
                     CBlock block;
                     block.ReadFromDisk((*mi).second, !pfrom->fClient);
-                    pfrom->PushMessage("block", block);// »ñÈ¡Êı¾İ¶ÔÓ¦µÄÀàĞÍÊÇblock£¬Ôò·¢ËÍ¶ÔÓ¦µÄ¿éĞÅÏ¢
+                    pfrom->PushMessage("block", block);// è·å–æ•°æ®å¯¹åº”çš„ç±»å‹æ˜¯blockï¼Œåˆ™å‘é€å¯¹åº”çš„å—ä¿¡æ¯
                 }
             }
             else if (inv.IsKnownType())
@@ -1934,7 +1934,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 // Send stream from relay memory
                 CRITICAL_BLOCK(cs_mapRelay)
                 {
-                    map<CInv, CDataStream>::iterator mi = mapRelay.find(inv); // ÖØĞÂ×ª²¥µÄÄÚÈİ
+                    map<CInv, CDataStream>::iterator mi = mapRelay.find(inv); // éœ€è¦è½¬æ’­çš„å†…å®¹
                     if (mi != mapRelay.end())
                         pfrom->PushMessage(inv.GetCommand(), (*mi).second);
                 }
@@ -1949,11 +1949,11 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         uint256 hashStop;
         vRecv >> locator >> hashStop;
 
-		//ÕÒµ½±¾µØÓĞµÄÇÒÔÚÖ÷Á´ÉÏµÄ
+		//æ‰¾åˆ°æœ¬åœ°æœ‰çš„ä¸”åœ¨ä¸»é“¾ä¸Šçš„
         // Find the first block the caller has in the main chain
         CBlockIndex* pindex = locator.GetBlockIndex();
 
-		// ½«Æ¥ÅäµÃµ½µÄ¿éË÷ÒıÖ®ºóµÄËùÓĞÔÚÖ÷Á´ÉÏµÄ¿é·¢ËÍ³öÈ¥
+		// å°†åŒ¹é…å¾—åˆ°çš„å—ç´¢å¼•ä¹‹åçš„æ‰€æœ‰åœ¨ä¸»é“¾ä¸Šçš„å—å‘é€å‡ºå»
         // Send the rest of the chain
         if (pindex)
             pindex = pindex->pnext;
@@ -1970,18 +1970,18 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             CRITICAL_BLOCK(pfrom->cs_inventory)
             {
                 CInv inv(MSG_BLOCK, pindex->GetBlockHash());
-				// ÅĞ¶ÏÔÚÒÑÖª¿â´æ2ÖĞÊÇ·ñ´æÔÚ
+				// åˆ¤æ–­åœ¨å·²çŸ¥åº“å­˜2ä¸­æ˜¯å¦å­˜åœ¨
                 // returns true if wasn't already contained in the set
                 if (pfrom->setInventoryKnown2.insert(inv).second)
                 {
                     pfrom->setInventoryKnown.erase(inv);
-                    pfrom->vInventoryToSend.push_back(inv);// ²åÈë¶ÔÓ¦µÄ¿â´æ·¢ËÍ¼¯ºÏÖĞ×¼±¸·¢ËÍ£¬ÔÚÁíÒ»¸öÏß³ÌÖĞ½øĞĞ·¢ËÍ£¬·¢ËÍµÄÏûÏ¢Îªinv
+                    pfrom->vInventoryToSend.push_back(inv);// æ’å…¥å¯¹åº”çš„åº“å­˜å‘é€é›†åˆä¸­å‡†å¤‡å‘é€ï¼Œåœ¨å¦ä¸€ä¸ªçº¿ç¨‹ä¸­è¿›è¡Œå‘é€ï¼Œå‘é€çš„æ¶ˆæ¯ä¸ºinv
                 }
             }
         }
     }
 
-	// ½»Ò×ÃüÁî
+	// äº¤æ˜“å‘½ä»¤
     else if (strCommand == "tx")
     {
         vector<uint256> vWorkQueue;
@@ -1990,18 +1990,18 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         vRecv >> tx;
 
         CInv inv(MSG_TX, tx.GetHash());
-        pfrom->AddInventoryKnown(inv);// ½«½»Ò×ÏûÏ¢·ÅÈëµ½¶ÔÓ¦µÄÒÑÖª¿â´æÖĞ
+        pfrom->AddInventoryKnown(inv);// å°†äº¤æ˜“æ¶ˆæ¯æ”¾å…¥åˆ°å¯¹åº”çš„å·²çŸ¥åº“å­˜ä¸­
 
         bool fMissingInputs = false;
-		// Èç¹û½»Ò×ÄÜ¹»±»½ÓÊÜ
+		// å¦‚æœäº¤æ˜“èƒ½å¤Ÿè¢«æ¥å—
         if (tx.AcceptTransaction(true, &fMissingInputs))
         {
             AddToWalletIfMine(tx, NULL);
-            RelayMessage(inv, vMsg);// ×ª²¥ÏûÏ¢
+            RelayMessage(inv, vMsg);// è½¬æ’­æ¶ˆæ¯
             mapAlreadyAskedFor.erase(inv);
             vWorkQueue.push_back(inv.hash);
 
-			// µİ¹é´¦ÀíËùÓĞÒÀÀµÕâ¸ö½»Ò×¶ÔÓ¦µÄ¹Â¶ù½»Ò×
+			// é€’å½’å¤„ç†æ‰€æœ‰ä¾èµ–è¿™ä¸ªäº¤æ˜“å¯¹åº”çš„å­¤å„¿äº¤æ˜“
             // Recursively process any orphan transactions that depended on this one
             for (int i = 0; i < vWorkQueue.size(); i++)
             {
@@ -2032,7 +2032,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         else if (fMissingInputs)
         {
             printf("storing orphan tx %s\n", inv.hash.ToString().substr(0,6).c_str());
-            AddOrphanTx(vMsg); // Èç¹û½»Ò×µ±Ç°²»±»½ÓÊÜÔò¶ÔÓ¦µÄ¹Â¶ù½»Ò×
+            AddOrphanTx(vMsg); // å¦‚æœäº¤æ˜“å½“å‰ä¸è¢«æ¥å—åˆ™å¯¹åº”çš„å­¤å„¿äº¤æ˜“
         }
     }
 
@@ -2064,18 +2064,18 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         printf("received block:\n"); pblock->print();
 
         CInv inv(MSG_BLOCK, pblock->GetHash());
-        pfrom->AddInventoryKnown(inv);// Ôö¼Ó¿â´æ
+        pfrom->AddInventoryKnown(inv);// å¢åŠ åº“å­˜
 
         if (ProcessBlock(pfrom, pblock.release()))
             mapAlreadyAskedFor.erase(inv);
     }
 
-	// »ñÈ¡½ÚµãµÄËùÓĞÒÑÖªµØÖ·
+	// è·å–èŠ‚ç‚¹çš„æ‰€æœ‰å·²çŸ¥åœ°å€
     else if (strCommand == "getaddr")
     {
         pfrom->vAddrToSend.clear();
         //// need to expand the time range if not enough found
-        int64 nSince = GetAdjustedTime() - 60 * 60; // in the last hour ÍùÇ°ÍÆÒ»¸öĞ¡Ê±
+        int64 nSince = GetAdjustedTime() - 60 * 60; // in the last hour å¾€å‰æ¨ä¸€ä¸ªå°æ—¶
         CRITICAL_BLOCK(cs_mapAddresses)
         {
             foreach(const PAIRTYPE(vector<unsigned char>, CAddress)& item, mapAddresses)
@@ -2171,7 +2171,7 @@ bool ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
 
 
-// ´¦Àí½Úµã¶ÔÓ¦µÄÏûÏ¢·¢ËÍ
+// å¤„ç†èŠ‚ç‚¹å¯¹åº”çš„æ¶ˆæ¯å‘é€
 bool SendMessages(CNode* pto)
 {
     CheckForShutdown(2);
@@ -2182,23 +2182,23 @@ bool SendMessages(CNode* pto)
             return true;
 
 
-        // ÏûÏ¢·¢ËÍµÄµØÖ·
+        // æ¶ˆæ¯å‘é€çš„åœ°å€
         // Message: addr
         //
         vector<CAddress> vAddrToSend;
         vAddrToSend.reserve(pto->vAddrToSend.size());
-		// Èç¹û·¢ËÍµÄµØÖ·²»ÔÚÒÑÖªµØÖ·µÄ¼¯ºÏÖĞ£¬Ôò½«Æä·ÅÈëÁÙÊ±µØÖ··¢ËÍÊı×éÖĞ
+		// å¦‚æœå‘é€çš„åœ°å€ä¸åœ¨å·²çŸ¥åœ°å€çš„é›†åˆä¸­ï¼Œåˆ™å°†å…¶æ”¾å…¥ä¸´æ—¶åœ°å€å‘é€æ•°ç»„ä¸­
         foreach(const CAddress& addr, pto->vAddrToSend)
             if (!pto->setAddrKnown.count(addr))
                 vAddrToSend.push_back(addr);
-		// Çå¿ÕµØÖ··¢ËÍµÄÊı×é
+		// æ¸…ç©ºåœ°å€å‘é€çš„æ•°ç»„
         pto->vAddrToSend.clear();
-		// Èç¹ûÁÙÊ±µØÖ··¢ËÍÊı×é²»Îª¿Õ£¬Ôò½øĞĞµØÖ·µÄÏûÏ¢µÄ·¢ËÍ
+		// å¦‚æœä¸´æ—¶åœ°å€å‘é€æ•°ç»„ä¸ä¸ºç©ºï¼Œåˆ™è¿›è¡Œåœ°å€çš„æ¶ˆæ¯çš„å‘é€
         if (!vAddrToSend.empty())
             pto->PushMessage("addr", vAddrToSend);
 
 
-        // ¿â´æÏûÏ¢´¦Àí
+        // åº“å­˜æ¶ˆæ¯å¤„ç†
         // Message: inventory
         //
         vector<CInv> vInventoryToSend;
@@ -2214,25 +2214,25 @@ bool SendMessages(CNode* pto)
             pto->vInventoryToSend.clear();
             pto->setInventoryKnown2.clear();
         }
-		// ¿â´æÏûÏ¢·¢ËÍ
+		// åº“å­˜æ¶ˆæ¯å‘é€
         if (!vInventoryToSend.empty())
             pto->PushMessage("inv", vInventoryToSend);
 
 
-        // getdataÏûÏ¢·¢ËÍ
+        // getdataæ¶ˆæ¯å‘é€
         // Message: getdata
         //
         vector<CInv> vAskFor;
         int64 nNow = GetTime() * 1000000;
         CTxDB txdb("r");
-		// ÅĞ¶Ï½Úµã¶ÔÓ¦µÄÇëÇóÏûÏ¢mapÊÇ·ñÎª¿Õ£¬ÇÒ¶ÔÓ¦µÄÇëÇómapÖĞµÄÏûÏ¢¶ÔÓ¦µÄ×îÔçÇëÇóÊ±¼äÊÇ·ñĞ¡ÓÚµ±Ç°Ê±¼ä
+		// åˆ¤æ–­èŠ‚ç‚¹å¯¹åº”çš„è¯·æ±‚æ¶ˆæ¯mapæ˜¯å¦ä¸ºç©ºï¼Œä¸”å¯¹åº”çš„è¯·æ±‚mapä¸­çš„æ¶ˆæ¯å¯¹åº”çš„æœ€æ—©è¯·æ±‚æ—¶é—´æ˜¯å¦å°äºå½“å‰æ—¶é—´
         while (!pto->mapAskFor.empty() && (*pto->mapAskFor.begin()).first <= nNow)
         {
             const CInv& inv = (*pto->mapAskFor.begin()).second;
             printf("sending getdata: %s\n", inv.ToString().c_str());
             if (!AlreadyHave(txdb, inv))
-                vAskFor.push_back(inv);// ²»´æÔÚ²ÅĞèÒª½øĞĞÏûÏ¢·¢ËÍ
-            pto->mapAskFor.erase(pto->mapAskFor.begin());// ÇëÇóÏûÏ¢´¦ÀíÍêÒ»Ìõ¾ÍÉ¾³ıÒ»Ìõ
+                vAskFor.push_back(inv);// ä¸å­˜åœ¨æ‰éœ€è¦è¿›è¡Œæ¶ˆæ¯å‘é€
+            pto->mapAskFor.erase(pto->mapAskFor.begin());// è¯·æ±‚æ¶ˆæ¯å¤„ç†å®Œä¸€æ¡å°±åˆ é™¤ä¸€æ¡
         }
         if (!vAskFor.empty())
             pto->PushMessage("getdata", vAskFor);
@@ -2277,7 +2277,7 @@ int FormatHashBlocks(void* pbuffer, unsigned int len)
 using CryptoPP::ByteReverse;
 static int detectlittleendian = 1;
 
-// ¼ÆËãhash
+// è®¡ç®—hash
 void BlockSHA256(const void* pin, unsigned int nBlocks, void* pout)
 {
     unsigned int* pinput = (unsigned int*)pin;
@@ -2285,13 +2285,13 @@ void BlockSHA256(const void* pin, unsigned int nBlocks, void* pout)
 
     CryptoPP::SHA256::InitState(pstate);
 
-    // ¼ì²éÊÇ´ó¶Ë»¹ÊÇĞ¡¶Ë
+    // æ£€æŸ¥æ˜¯å¤§ç«¯è¿˜æ˜¯å°ç«¯
     if (*(char*)&detectlittleendian != 0)
     {
         for (int n = 0; n < nBlocks; n++)
         {
             unsigned int pbuf[16];
-            // ´óĞ¡¶ËµÄÎÊÌâ½«×Ö½Ú·­×ª
+            // å¤§å°ç«¯çš„é—®é¢˜å°†å­—èŠ‚ç¿»è½¬
             for (int i = 0; i < 16; i++)
                 pbuf[i] = ByteReverse(pinput[n * 16 + i]);
             CryptoPP::SHA256::Transform(pstate, pbuf);
@@ -2306,15 +2306,15 @@ void BlockSHA256(const void* pin, unsigned int nBlocks, void* pout)
     }
 }
 
-// ½ÚµãÍÚ¿ó
+// èŠ‚ç‚¹æŒ–çŸ¿
 bool BitcoinMiner()
 {
     printf("BitcoinMiner started\n");
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST);
 
     CKey key;
-    key.MakeNewKey(); // Ê¹ÓÃÍÖÔ²ÇúÏßËã·¨»ñµÃÒ»¶Ô¹«Ô¿ºÍË½Ô¿
-	// Ëæ»úÊı´Ó0¿ªÊ¼
+    key.MakeNewKey(); // ä½¿ç”¨æ¤­åœ†æ›²çº¿ç®—æ³•è·å¾—ä¸€å¯¹å…¬é’¥å’Œç§é’¥
+	// éšæœºæ•°ä»0å¼€å§‹
     CBigNum bnExtraNonce = 0;
     while (fGenerateBitcoins)
     {
@@ -2328,11 +2328,11 @@ bool BitcoinMiner()
 
         unsigned int nTransactionsUpdatedLast = nTransactionsUpdated;
         CBlockIndex* pindexPrev = pindexBest;
-		// »ñÈ¡ÍÚ¿óÄÑ¶È
+		// è·å–æŒ–çŸ¿éš¾åº¦
         unsigned int nBits = GetNextWorkRequired(pindexPrev);
 
 
-        // ´´½¨´´±Ò½»Ò×
+        // åˆ›å»ºåˆ›å¸äº¤æ˜“
         // Create coinbase tx
         //
         CTransaction txNew;
@@ -2343,18 +2343,18 @@ bool BitcoinMiner()
         txNew.vout[0].scriptPubKey << key.GetPubKey() << OP_CHECKSIG;
 
 
-        // ´´½¨ĞÂµÄÇø¿é
+        // åˆ›å»ºæ–°çš„åŒºå—
         // Create new block
         //
         auto_ptr<CBlock> pblock(new CBlock());
         if (!pblock.get())
             return false;
 
-		// Ôö¼Ó±Ò»ù½»Ò××óÓÒÇø¿éµÄµÚÒ»¸ö½»Ò×
+		// å¢åŠ å¸åŸºäº¤æ˜“å·¦å³åŒºå—çš„ç¬¬ä¸€ä¸ªäº¤æ˜“
         // Add our coinbase tx as first transaction
         pblock->vtx.push_back(txNew);
 
-		// ÊÕ¼¯×îĞÂµÄ½»Ò×·ÅÈëÇø¿éÖĞ
+		// æ”¶é›†æœ€æ–°çš„äº¤æ˜“æ”¾å…¥åŒºå—ä¸­
         // Collect the latest transactions into the block
         int64 nFees = 0;
         CRITICAL_BLOCK(cs_main)
@@ -2365,7 +2365,7 @@ bool BitcoinMiner()
             vector<char> vfAlreadyAdded(mapTransactions.size());
             bool fFoundSomething = true;
             unsigned int nBlockSize = 0;
-            // Íâ²ãÑ­»·ÊÇÒòÎªÊÇ¶àÏß³Ì£¬¿ÉÄÜ¸Õ¿ªÊ¼¶ÔÓ¦µÄ½»Ò×Ã»ÓĞÔõÃ´¶à£¬ÔòÔÚµÈ´ı½»Ò×£¬½øĞĞ´ò°ü£¬Ö»µÈ´ıÒ»ÂÖ£¬Èç¹ûmapTransactionsÓĞºÜ¶à½»Ò×ÔòÒ»Æğ´ò°ü
+            // å¤–å±‚å¾ªç¯æ˜¯å› ä¸ºæ˜¯å¤šçº¿ç¨‹ï¼Œå¯èƒ½åˆšå¼€å§‹å¯¹åº”çš„äº¤æ˜“æ²¡æœ‰æ€ä¹ˆå¤šï¼Œåˆ™åœ¨ç­‰å¾…äº¤æ˜“ï¼Œè¿›è¡Œæ‰“åŒ…ï¼Œåªç­‰å¾…ä¸€è½®ï¼Œå¦‚æœmapTransactionsæœ‰å¾ˆå¤šäº¤æ˜“åˆ™ä¸€èµ·æ‰“åŒ…
             while (fFoundSomething && nBlockSize < MAX_SIZE/2)
             {
                 fFoundSomething = false;
@@ -2381,24 +2381,24 @@ bool BitcoinMiner()
                     // Transaction fee requirements, mainly only needed for flood control
                     // Under 10K (about 80 inputs) is free for first 100 transactions
                     // Base rate is 0.01 per KB
-                    // ¸ù¾İ·ÑÓÃÀ´ÅĞ¶ÏÃ¿Ò»¸ö½»Ò×ĞèÒªµÄ×îÉÙ·ÑÓÃ
+                    // æ ¹æ®è´¹ç”¨æ¥åˆ¤æ–­æ¯ä¸€ä¸ªäº¤æ˜“éœ€è¦çš„æœ€å°‘è´¹ç”¨
                     int64 nMinFee = tx.GetMinFee(pblock->vtx.size() < 100);
 
                     map<uint256, CTxIndex> mapTestPoolTmp(mapTestPool);
-                    // ÅĞ¶Ïµ±Ç°½»Ò×ÊÇ·ñÂú×ã¶ÔÓ¦µÄ×îµÍ·ÑÓÃÒªÇó£¬¶ÔÓ¦µÄnFeesÔÚConnectInputsÊÇ½øĞĞÀÛ¼ÓµÄ
+                    // åˆ¤æ–­å½“å‰äº¤æ˜“æ˜¯å¦æ»¡è¶³å¯¹åº”çš„æœ€ä½è´¹ç”¨è¦æ±‚ï¼Œå¯¹åº”çš„nFeesåœ¨ConnectInputsæ˜¯è¿›è¡Œç´¯åŠ çš„
                     if (!tx.ConnectInputs(txdb, mapTestPoolTmp, CDiskTxPos(1,1,1), 0, nFees, false, true, nMinFee))
                         continue;
                     swap(mapTestPool, mapTestPoolTmp);
 
                     pblock->vtx.push_back(tx);
-                    nBlockSize += ::GetSerializeSize(tx, SER_NETWORK); // ½«µ±Ç°¼ÓÈë¿éµÄ½»Ò×´óĞ¡¼ÓÈë¶ÔÓ¦µÄ¿é´óĞ¡ÖĞ
+                    nBlockSize += ::GetSerializeSize(tx, SER_NETWORK); // å°†å½“å‰åŠ å…¥å—çš„äº¤æ˜“å¤§å°åŠ å…¥å¯¹åº”çš„å—å¤§å°ä¸­
                     vfAlreadyAdded[n] = true;
                     fFoundSomething = true;
                 }
             }
         }
-        pblock->nBits = nBits; // ÉèÖÃ¶ÔÓ¦µÄÍÚ¿ÓÄÑ¶ÈÖµ
-        pblock->vtx[0].vout[0].nValue = pblock->GetBlockValue(nFees); // ÉèÖÃ¶ÔÓ¦µÄ¿éµÚÒ»¸ö½»Ò×¶ÔÓ¦µÄÊä³ö¶ÔÓ¦µÄÖµ=½±Àø + ½»Ò×·ÑÓÃ
+        pblock->nBits = nBits; // è®¾ç½®å¯¹åº”çš„æŒ–å‘éš¾åº¦å€¼
+        pblock->vtx[0].vout[0].nValue = pblock->GetBlockValue(nFees); // è®¾ç½®å¯¹åº”çš„å—ç¬¬ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„è¾“å‡ºå¯¹åº”çš„å€¼=å¥–åŠ± + äº¤æ˜“è´¹ç”¨
         printf("\n\nRunning BitcoinMiner with %d transactions in block\n", pblock->vtx.size());
 
 
@@ -2426,10 +2426,10 @@ bool BitcoinMiner()
         tmp.block.nVersion       = pblock->nVersion;
         tmp.block.hashPrevBlock  = pblock->hashPrevBlock  = (pindexPrev ? pindexPrev->GetBlockHash() : 0);
         tmp.block.hashMerkleRoot = pblock->hashMerkleRoot = pblock->BuildMerkleTree();
-        // È¡Ç°11¸öÇø¿é¶ÔÓ¦µÄ´´½¨Ê±¼ä¶ÔÓ¦µÄÖĞÎ»Êı
+        // å–å‰11ä¸ªåŒºå—å¯¹åº”çš„åˆ›å»ºæ—¶é—´å¯¹åº”çš„ä¸­ä½æ•°
         tmp.block.nTime          = pblock->nTime          = max((pindexPrev ? pindexPrev->GetMedianTimePast()+1 : 0), GetAdjustedTime());
         tmp.block.nBits          = pblock->nBits          = nBits;
-        tmp.block.nNonce         = pblock->nNonce         = 1; // Ëæ»úÊı´Ó1¿ªÊ¼
+        tmp.block.nNonce         = pblock->nNonce         = 1; // éšæœºæ•°ä»1å¼€å§‹
 
         unsigned int nBlocks0 = FormatHashBlocks(&tmp.block, sizeof(tmp.block));
         unsigned int nBlocks1 = FormatHashBlocks(&tmp.hash1, sizeof(tmp.hash1));
@@ -2439,7 +2439,7 @@ bool BitcoinMiner()
         // Search
         //
         unsigned int nStart = GetTime();
-        uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256(); // ¸ù¾İÄÑ¶ÈÏµÊıÖµ»ñÈ¡¶ÔÓ¦µÄhashÄ¿±êÖµ
+        uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256(); // æ ¹æ®éš¾åº¦ç³»æ•°å€¼è·å–å¯¹åº”çš„hashç›®æ ‡å€¼
         uint256 hash;
         loop
         {
@@ -2447,7 +2447,7 @@ bool BitcoinMiner()
             BlockSHA256(&tmp.hash1, nBlocks1, &hash);
 
 
-            // ÍÚ¿ó³É¹¦
+            // æŒ–çŸ¿æˆåŠŸ
             if (hash <= hashTarget)
             {
                 pblock->nNonce = tmp.block.nNonce;
@@ -2476,7 +2476,7 @@ bool BitcoinMiner()
                 break;
             }
 
-            // ¸üĞÂÇø¿é´´½¨Ê±¼ä£¬ÖØĞÂÓÃÓÚÍÚ¿ó
+            // æ›´æ–°åŒºå—åˆ›å»ºæ—¶é—´ï¼Œé‡æ–°ç”¨äºæŒ–çŸ¿
             // Update nTime every few seconds
             if ((++tmp.block.nNonce & 0x3ffff) == 0)
             {
@@ -2544,15 +2544,15 @@ int64 GetBalance()
 
 
 
-bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // Ñ¡³ö·ûºÏÕâ¸ö½»Ò×Êä³öµÄËùÓĞ½»Ò×ÊäÈë
-{  // nTargetValueÊÇ×ª³öµÄÇ®µÄÊıÁ¿£¬setCoinRet·µ»ØµÄ½»Ò×ÊäÈëµÄ¼¯ºÏ
+bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // é€‰å‡ºç¬¦åˆè¿™ä¸ªäº¤æ˜“è¾“å‡ºçš„æ‰€æœ‰äº¤æ˜“è¾“å…¥
+{  // nTargetValueæ˜¯è½¬å‡ºçš„é’±çš„æ•°é‡ï¼ŒsetCoinRetè¿”å›çš„äº¤æ˜“è¾“å…¥çš„é›†åˆ
     setCoinsRet.clear();
 
     // List of values less than target
     int64 nLowestLarger = _I64_MAX;
-    CWalletTx* pcoinLowestLarger = NULL; // ´óÓÚÄ¿±êÖµÇÒ×î½Ó½üÄ¿±êÖµµÄ½»Ò×
-    vector<pair<int64, CWalletTx*> > vValue; // Ğ¡½»Ò×£¨Êı¶îĞ¡ÓÚÄ¿±êÖµ£©µÄ×éºÏ£¬keyÎªÊı¶î£¬valueÎª½»Ò×
-    int64 nTotalLower = 0; // Ğ¡½»Ò×µÄÊı¶î×ÜºÍ
+    CWalletTx* pcoinLowestLarger = NULL; // å¤§äºç›®æ ‡å€¼ä¸”æœ€æ¥è¿‘ç›®æ ‡å€¼çš„äº¤æ˜“
+    vector<pair<int64, CWalletTx*> > vValue; // å°äº¤æ˜“ï¼ˆæ•°é¢å°äºç›®æ ‡å€¼ï¼‰çš„ç»„åˆï¼Œkeyä¸ºæ•°é¢ï¼Œvalueä¸ºäº¤æ˜“
+    int64 nTotalLower = 0; // å°äº¤æ˜“çš„æ•°é¢æ€»å’Œ
 
     CRITICAL_BLOCK(cs_mapWallet)
     {
@@ -2592,8 +2592,8 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // Ñ¡³ö·ûºÏÕâ
 
     // Solve subset sum by stochastic approximation
     sort(vValue.rbegin(), vValue.rend());
-    vector<char> vfIncluded; // Ñ¡È¡³öÀ´µÄĞ¡½»Ò×£¨Êı¶îĞ¡ÓÚÄ¿±êÖµµÄ½»Ò×£©×éºÏ
-    vector<char> vfBest(vValue.size(), true); // ×îºÏÊÊµÄĞ¡½»Ò××éºÏ
+    vector<char> vfIncluded; // é€‰å–å‡ºæ¥çš„å°äº¤æ˜“ï¼ˆæ•°é¢å°äºç›®æ ‡å€¼çš„äº¤æ˜“ï¼‰ç»„åˆ
+    vector<char> vfBest(vValue.size(), true); // æœ€åˆé€‚çš„å°äº¤æ˜“ç»„åˆ
     int64 nBest = nTotalLower;
 
     for (int nRep = 0; nRep < 1000 && nBest != nTargetValue; nRep++)
@@ -2601,7 +2601,7 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // Ñ¡³ö·ûºÏÕâ
         vfIncluded.assign(vValue.size(), false);
         int64 nTotal = 0;
         bool fReachedTarget = false;
-		// µÚÒ»´ÎÑ­»·Ëæ»úÈ¡£¬Èç¹ûÃ»´ïµ½Ä¿±êÖµÔò½øĞĞµÚ¶ş´ÎÑ­»·È¡Ê£ÏÂµÄ½»Ò×
+		// ç¬¬ä¸€æ¬¡å¾ªç¯éšæœºå–ï¼Œå¦‚æœæ²¡è¾¾åˆ°ç›®æ ‡å€¼åˆ™è¿›è¡Œç¬¬äºŒæ¬¡å¾ªç¯å–å‰©ä¸‹çš„äº¤æ˜“
         for (int nPass = 0; nPass < 2 && !fReachedTarget; nPass++)
         {
             for (int i = 0; i < vValue.size(); i++)
@@ -2610,7 +2610,7 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // Ñ¡³ö·ûºÏÕâ
                 {
                     nTotal += vValue[i].first;
                     vfIncluded[i] = true;
-                    if (nTotal >= nTargetValue) // ×îºóÒ»±Ê½»Ò×µÄÊı¶î¼ÓÉÏ¸ÕºÃ´ïµ½Ä¿±êÖµÊ±£¬ÔòÌôÑ¡³ö×îĞ¡£¨×î½Ó½üÄ¿±êÖµ£©µÄ½»Ò×
+                    if (nTotal >= nTargetValue) // æœ€åä¸€ç¬”äº¤æ˜“çš„æ•°é¢åŠ ä¸Šåˆšå¥½è¾¾åˆ°ç›®æ ‡å€¼æ—¶ï¼Œåˆ™æŒ‘é€‰å‡ºæœ€å°ï¼ˆæœ€æ¥è¿‘ç›®æ ‡å€¼ï¼‰çš„äº¤æ˜“
                     {
                         fReachedTarget = true;
                         if (nTotal < nBest)
@@ -2627,8 +2627,8 @@ bool SelectCoins(int64 nTargetValue, set<CWalletTx*>& setCoinsRet) // Ñ¡³ö·ûºÏÕâ
     }
 
     // If the next larger is still closer, return it
-    // Èç¹ûpcoinLowestLargerÕâ¸ö½»Ò×(±ÈÄ¿±êÖµ´óÇÒ×î½Ó½üÄ¿±êÖµµÄ½»Ò×)µÄÖµÏà¶Ô
-    // ×éºÏµÄĞ¡½»Ò×µÄÖµµÄºÍ¸ü½Ó½üÄ¿±êÖµ£¬Ôò·µ»ØÕâ¸ö½»Ò×¡£·´Ö®·µ»ØĞ¡½»Ò×£¨Êı¶îĞ¡ÓÚÄ¿±êÖµµÄ½»Ò×£©
+    // å¦‚æœpcoinLowestLargerè¿™ä¸ªäº¤æ˜“(æ¯”ç›®æ ‡å€¼å¤§ä¸”æœ€æ¥è¿‘ç›®æ ‡å€¼çš„äº¤æ˜“)çš„å€¼ç›¸å¯¹
+    // ç»„åˆçš„å°äº¤æ˜“çš„å€¼çš„å’Œæ›´æ¥è¿‘ç›®æ ‡å€¼ï¼Œåˆ™è¿”å›è¿™ä¸ªäº¤æ˜“ã€‚åä¹‹è¿”å›å°äº¤æ˜“ï¼ˆæ•°é¢å°äºç›®æ ‡å€¼çš„äº¤æ˜“ï¼‰
     if (pcoinLowestLarger && nLowestLarger - nTargetValue <= nBest - nTargetValue)
         setCoinsRet.insert(pcoinLowestLarger);
     else
@@ -2667,31 +2667,31 @@ bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, in
                 wtxNew.vout.clear();
                 if (nValue < 0)
                     return false;
-                int64 nValueOut = nValue; // ×ª¸ø±ğÈËµÄÇ®
-                nValue += nFee; // ×ª¸ø±ğÈËµÄÇ®¼ÓÉÏÊÖĞø·Ñ
+                int64 nValueOut = nValue; // è½¬ç»™åˆ«äººçš„é’±
+                nValue += nFee; // è½¬ç»™åˆ«äººçš„é’±åŠ ä¸Šæ‰‹ç»­è´¹
 
                 // Choose coins to use
                 set<CWalletTx*> setCoins;
-                if (!SelectCoins(nValue, setCoins)) // Ñ¡Ôñ½»Ò×ÊäÈë
+                if (!SelectCoins(nValue, setCoins)) // é€‰æ‹©äº¤æ˜“è¾“å…¥
                     return false;
                 int64 nValueIn = 0;
                 foreach(CWalletTx* pcoin, setCoins)
-                    nValueIn += pcoin->GetCredit(); // »ñÈ¡½»Ò×ÊäÈëµÄ×Ü¶î
+                    nValueIn += pcoin->GetCredit(); // è·å–äº¤æ˜“è¾“å…¥çš„æ€»é¢
 
                 // Fill vout[0] to the payee
-                // vout[0] ÊÇ×ª¸ø±ğÈËµÄÇ®
+                // vout[0] æ˜¯è½¬ç»™åˆ«äººçš„é’±
                 wtxNew.vout.push_back(CTxOut(nValueOut, scriptPubKey));
 
                 // Fill vout[1] back to self with any change
-                // Èç¹ûĞèÒªÕÒÁã£¬vout[1]ÊÇ×ª¸ø×Ô¼ºµÄÇ®£¨¼´ÕÒÁãµÄÇ®£©
+                // å¦‚æœéœ€è¦æ‰¾é›¶ï¼Œvout[1]æ˜¯è½¬ç»™è‡ªå·±çš„é’±ï¼ˆå³æ‰¾é›¶çš„é’±ï¼‰
                 if (nValueIn > nValue)
                 {
                     // Use the same key as one of the coins
                     vector<unsigned char> vchPubKey;
                     CTransaction& txFirst = *(*setCoins.begin());
                     foreach(const CTxOut& txout, txFirst.vout)
-                        if (txout.IsMine()) // ÅĞ¶Ï½»Ò×Êä³öÊÇ²»ÊÇÊä³ö¸ø×Ô¼ºµÄ£¨¼´ÊÇ²»ÊÇ×ª¸ø×Ô¼ºµÄÇ®£©
-                            if (ExtractPubKey(txout.scriptPubKey, true, vchPubKey)) // ´ÓËø¶¨½Å±¾ÖĞÌáÈ¡¹«Ô¿
+                        if (txout.IsMine()) // åˆ¤æ–­äº¤æ˜“è¾“å‡ºæ˜¯ä¸æ˜¯è¾“å‡ºç»™è‡ªå·±çš„ï¼ˆå³æ˜¯ä¸æ˜¯è½¬ç»™è‡ªå·±çš„é’±ï¼‰
+                            if (ExtractPubKey(txout.scriptPubKey, true, vchPubKey)) // ä»é”å®šè„šæœ¬ä¸­æå–å…¬é’¥
                                 break;
                     if (vchPubKey.empty())
                         return false;
@@ -2703,7 +2703,7 @@ bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, in
                 }
 
                 // Fill vin
-                // Ìî³ä½»Ò×ÊäÈëÀïµÄprevout£¨ÉÏÒ»±Ê½»Ò×Êä³ö£©£¬²¢°Ñ½»Ò×ÊäÈë·Åµ½µ±Ç°½»Ò×ÀïÈ¥
+                // å¡«å……äº¤æ˜“è¾“å…¥é‡Œçš„prevoutï¼ˆä¸Šä¸€ç¬”äº¤æ˜“è¾“å‡ºï¼‰ï¼Œå¹¶æŠŠäº¤æ˜“è¾“å…¥æ”¾åˆ°å½“å‰äº¤æ˜“é‡Œå»
                 foreach(CWalletTx* pcoin, setCoins)
                     for (int nOut = 0; nOut < pcoin->vout.size(); nOut++)
                         if (pcoin->vout[nOut].IsMine())
@@ -2717,7 +2717,7 @@ bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, in
                             SignSignature(*pcoin, wtxNew, nIn++);
 
                 // Check that enough fee is included
-                // ¼ÆËã½»Ò×ËùĞèµÄÊÖĞø·Ñ
+                // è®¡ç®—äº¤æ˜“æ‰€éœ€çš„æ‰‹ç»­è´¹
                 if (nFee < wtxNew.GetMinFee(true))
                 {
                     nFee = nFeeRequiredRet = wtxNew.GetMinFee(true);
@@ -2771,7 +2771,7 @@ bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
     CRITICAL_BLOCK(cs_main)
     {
         int64 nFeeRequired;
-		// ĞÂ½¨½»Ò×£¬·µ»ØwtxNew(½»Ò×),nFeedRequired(½»Ò×ĞèÒªµÄÊÖĞø·Ñ)
+		// æ–°å»ºäº¤æ˜“ï¼Œè¿”å›wtxNew(äº¤æ˜“),nFeedRequired(äº¤æ˜“éœ€è¦çš„æ‰‹ç»­è´¹)
         if (!CreateTransaction(scriptPubKey, nValue, wtxNew, nFeeRequired))
         {
             string strError;
@@ -2791,7 +2791,7 @@ bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
         printf("SendMoney: %s\n", wtxNew.GetHash().ToString().substr(0,6).c_str());
 
         // Broadcast
-        if (!wtxNew.AcceptTransaction()) // °ÑwtxNew¼Óµ½mapTransactionÈ¥
+        if (!wtxNew.AcceptTransaction()) // æŠŠwtxNewåŠ åˆ°mapTransactionå»
         {
             // This must not fail. The transaction has already been signed and recorded.
             throw runtime_error("SendMoney() : wtxNew.AcceptTransaction() failed\n");
