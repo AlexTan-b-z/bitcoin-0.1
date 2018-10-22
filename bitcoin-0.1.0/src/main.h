@@ -15,11 +15,11 @@ class CWalletTx;
 class CKeyItem;
 
 static const unsigned int MAX_SIZE = 0x02000000;
-// COIN ±íÊ¾µÄÊÇÒ»¸ö±ÈÌØ±Ò£¬¶øÇÒ100000000¾ÍÊÇ±íÊ¾Ò»¸ö±ÈÌØ±Ò£¬±ÈÌØ±Ò×îĞ¡µ¥Î»ÎªĞ¡Êıµãºó8Î»
+// COIN è¡¨ç¤ºçš„æ˜¯ä¸€ä¸ªæ¯”ç‰¹å¸ï¼Œè€Œä¸”100000000å°±æ˜¯è¡¨ç¤ºä¸€ä¸ªæ¯”ç‰¹å¸ï¼Œæ¯”ç‰¹å¸æœ€å°å•ä½ä¸ºå°æ•°ç‚¹å8ä½
 static const int64 COIN = 100000000;
 static const int64 CENT = 1000000;
-static const int COINBASE_MATURITY = 100;// ´´±Ò½»Ò×µÄ³ÉÊì¶È£¨´´±Ò½»Ò×Òª¾­¹ı100¸öÇø¿éºó²ÅÄÜ±»»¨·Ñ£©
-// ¹¤×÷Á¿Ö¤Ã÷µÄÄÑ¶È
+static const int COINBASE_MATURITY = 100;// åˆ›å¸äº¤æ˜“çš„æˆç†Ÿåº¦ï¼ˆåˆ›å¸äº¤æ˜“è¦ç»è¿‡100ä¸ªåŒºå—åæ‰èƒ½è¢«èŠ±è´¹ï¼‰
+// å·¥ä½œé‡è¯æ˜çš„éš¾åº¦
 static const CBigNum bnProofOfWorkLimit(~uint256(0) >> 32);
 
 
@@ -81,9 +81,9 @@ bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew);
 class CDiskTxPos
 {
 public:
-    unsigned int nFile; // ¿éËùÔÚÎÄ¼şµÄĞÅÏ¢£¬¶øÇÒ¿éÎÄ¼şµÄÃüÃûÒ»°ãÊÇblk${nFile}.dat
-    unsigned int nBlockPos; // µ±Ç°¿éÔÚ¶ÔÓ¦¿éÎÄ¼şÖĞµÄÆ«ÒÆ
-    unsigned int nTxPos; // ½»Ò×ÔÚ¶ÔÓ¦¿éÖĞµÄÆ«ÒÆ
+    unsigned int nFile; // å—æ‰€åœ¨æ–‡ä»¶çš„ä¿¡æ¯ï¼Œè€Œä¸”å—æ–‡ä»¶çš„å‘½åä¸€èˆ¬æ˜¯blk${nFile}.dat
+    unsigned int nBlockPos; // å½“å‰å—åœ¨å¯¹åº”å—æ–‡ä»¶ä¸­çš„åç§»
+    unsigned int nTxPos; // äº¤æ˜“åœ¨å¯¹åº”å—ä¸­çš„åç§»
 
     CDiskTxPos()
     {
@@ -133,8 +133,8 @@ public:
 class CInPoint
 {
 public:
-    CTransaction* ptx; // ½»Ò×Ö¸Õë
-    unsigned int n; // ¶ÔÓ¦½»Ò×µ±Ç°µÄµÚ¼¸¸öÊäÈë
+    CTransaction* ptx; // äº¤æ˜“æŒ‡é’ˆ
+    unsigned int n; // å¯¹åº”äº¤æ˜“å½“å‰çš„ç¬¬å‡ ä¸ªè¾“å…¥
 
     CInPoint() { SetNull(); }
     CInPoint(CTransaction* ptxIn, unsigned int nIn) { ptx = ptxIn; n = nIn; }
@@ -148,8 +148,8 @@ public:
 class COutPoint
 {
 public:
-    uint256 hash; // ½»Ò×¶ÔÓ¦µÄhash£¬Õâ¸ö¶ÔÓ¦µÄÊÇCTransactionµÄhash£¬¶ø²»ÊÇCTxOut
-    unsigned int n; // ½»Ò×¶ÔÓ¦µÄµÚ¼¸¸öÊä³ö
+    uint256 hash; // äº¤æ˜“å¯¹åº”çš„hashï¼Œè¿™ä¸ªå¯¹åº”çš„æ˜¯CTransactionçš„hashï¼Œè€Œä¸æ˜¯CTxOut
+    unsigned int n; // äº¤æ˜“å¯¹åº”çš„ç¬¬å‡ ä¸ªè¾“å‡º
 
     COutPoint() { SetNull(); }
     COutPoint(uint256 hashIn, unsigned int nIn) { hash = hashIn; n = nIn; }
@@ -194,9 +194,9 @@ public:
 class CTxIn
 {
 public:
-    COutPoint prevout; // Ç°Ò»¸ö½»Ò×¶ÔÓ¦µÄÊä³ö£¨½ĞÒ»¸ö½»Ò×¶ÔÓ¦µÄhashÖµºÍ¶ÔÓ¦µÄµÚ¼¸¸öÊä³ö£©
-    CScript scriptSig; // ÊäÈë½Å±¾¶ÔÓ¦µÄÇ©Ãû
-    unsigned int nSequence;// Ö÷ÒªÊÇÓÃÓÚÅĞ¶ÏÏàÍ¬ÊäÈëµÄ½»Ò×ÄÄÒ»¸ö¸üĞÂ£¬ÖµÔ½´óÔ½ĞÂ
+    COutPoint prevout; // å‰ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„è¾“å‡ºï¼ˆå«ä¸€ä¸ªäº¤æ˜“å¯¹åº”çš„hashå€¼å’Œå¯¹åº”çš„ç¬¬å‡ ä¸ªè¾“å‡ºï¼‰
+    CScript scriptSig; // è§£é”è„šæœ¬
+    unsigned int nSequence;// ä¸»è¦æ˜¯ç”¨äºåˆ¤æ–­ç›¸åŒè¾“å…¥çš„äº¤æ˜“å“ªä¸€ä¸ªæ›´æ–°ï¼Œå€¼è¶Šå¤§è¶Šæ–°
 
     CTxIn()
     {
@@ -223,7 +223,7 @@ public:
         READWRITE(scriptSig);
         READWRITE(nSequence);
     )
-    // ½»Ò×¶ÔÓ¦nSequenceÊÇ×î´ó£¬ÒÑ¾­ÊÇ×îĞÂÁË£¬ÊÇ×îÖÕµÄ
+    // äº¤æ˜“å¯¹åº”nSequenceæ˜¯æœ€å¤§ï¼Œå·²ç»æ˜¯æœ€æ–°äº†ï¼Œæ˜¯æœ€ç»ˆçš„
     bool IsFinal() const
     {
         return (nSequence == UINT_MAX);
@@ -261,9 +261,9 @@ public:
         printf("%s\n", ToString().c_str());
     }
 
-	// ÅĞ¶Ïµ±Ç°ÊäÈëµÄ½»Ò×ÊÇ·ñÊôÓÚ±¾½Úµã£¬¾ÍÊÇ¶ÔÓ¦µÄ½Å±¾Ç©ÃûÊÇ·ñÔÚ±¾µØÄÜ¹»ÕÒµ½
+	// åˆ¤æ–­å½“å‰è¾“å…¥çš„äº¤æ˜“æ˜¯å¦å±äºæœ¬èŠ‚ç‚¹ï¼Œå°±æ˜¯å¯¹åº”çš„è„šæœ¬ç­¾åæ˜¯å¦åœ¨æœ¬åœ°èƒ½å¤Ÿæ‰¾åˆ°
     bool IsMine() const;
-	// »ñµÃ¶ÔÓ¦½»Ò×µÄ½è·½½ğ¶î£¬Èç¹û¶ÔÓ¦µÄÊäÈëÊÇ±¾½ÚµãµÄÕËºÅ£¬Ôò½è·½½ğ¶î¾ÍÊÇ½»Ò×ÊäÈë½ğ¶î
+	// è·å¾—å¯¹åº”äº¤æ˜“çš„å€Ÿæ–¹é‡‘é¢ï¼Œå¦‚æœå¯¹åº”çš„è¾“å…¥æ˜¯æœ¬èŠ‚ç‚¹çš„è´¦å·ï¼Œåˆ™å€Ÿæ–¹é‡‘é¢å°±æ˜¯äº¤æ˜“è¾“å…¥é‡‘é¢
     int64 GetDebit() const;
 };
 
@@ -277,8 +277,8 @@ public:
 class CTxOut
 {
 public:
-    int64 nValue; // ½»Ò×Êä³ö¶ÔÓ¦µÄ½ğ¶î
-    CScript scriptPubKey; // Ëø¶¨½Å±¾
+    int64 nValue; // äº¤æ˜“è¾“å‡ºå¯¹åº”çš„é‡‘é¢
+    CScript scriptPubKey; // é”å®šè„šæœ¬
 
 public:
     CTxOut()
@@ -314,13 +314,13 @@ public:
         return SerializeHash(*this);
     }
 
-	// ÅĞ¶Ï½»Ò×µÄÊä³öÊÇ·ñÊÇ½Úµã×Ô¼º±¾ÉíµÄ½»Ò×£¬Í¨¹ıËø¶¨½Å±¾ÀïµÄ¹«Ô¿¹şÏ£±È¶ÔÅĞ¶Ï
+	// åˆ¤æ–­äº¤æ˜“çš„è¾“å‡ºæ˜¯å¦æ˜¯èŠ‚ç‚¹è‡ªå·±æœ¬èº«çš„äº¤æ˜“ï¼Œé€šè¿‡é”å®šè„šæœ¬é‡Œçš„å…¬é’¥å“ˆå¸Œæ¯”å¯¹åˆ¤æ–­
     bool IsMine() const
     {
         return ::IsMine(scriptPubKey);
     }
 
-	// Èç¹ûµ±Ç°½»Ò×ÊÇ×ª¸ø×Ô¼ºµÄ£¬¾Í·µ»ØÊıÁ¿£¨¼´ÊôÓÚ×Ô¼ºµÄÓà¶îµÄÒ»²¿·Ö£©
+	// å¦‚æœå½“å‰äº¤æ˜“æ˜¯è½¬ç»™è‡ªå·±çš„ï¼Œå°±è¿”å›æ•°é‡ï¼ˆå³å±äºè‡ªå·±çš„ä½™é¢çš„ä¸€éƒ¨åˆ†ï¼‰
     int64 GetCredit() const
     {
         if (IsMine())
@@ -362,10 +362,10 @@ public:
 class CTransaction
 {
 public:
-    int nVersion; // ½»Ò×µÄ°æ±¾ºÅ£¬ÓÃÓÚÉı¼¶
-    vector<CTxIn> vin; // ½»Ò×¶ÔÓ¦µÄÊäÈë
-    vector<CTxOut> vout; // ½»Ò×¶ÔÓ¦µÄÊä³ö
-    int nLockTime; // ½»Ò×¶ÔÓ¦µÄËø¶¨Ê±¼ä
+    int nVersion; // äº¤æ˜“çš„ç‰ˆæœ¬å·ï¼Œç”¨äºå‡çº§
+    vector<CTxIn> vin; // äº¤æ˜“å¯¹åº”çš„è¾“å…¥
+    vector<CTxOut> vout; // äº¤æ˜“å¯¹åº”çš„è¾“å‡º
+    int nLockTime; // äº¤æ˜“å¯¹åº”çš„é”å®šæ—¶é—´
 
 
     CTransaction()
@@ -400,10 +400,10 @@ public:
         return SerializeHash(*this);
     }
 
-    // ÅĞ¶ÏÊÇ·ñÊÇ×îÖÕµÄ½»Ò×
+    // åˆ¤æ–­æ˜¯å¦æ˜¯æœ€ç»ˆçš„äº¤æ˜“
     bool IsFinal() const
     {
-        // Èç¹ûËø¶¨Ê±¼äµÈÓÚ0»òÕßËø¶¨Ê±¼äĞ¡ÓÚÖ÷Á´µÄ³¤¶È£¬ÔòËµÃ÷ÊÇ×îÖÕµÄ½»Ò×
+        // å¦‚æœé”å®šæ—¶é—´ç­‰äº0æˆ–è€…é”å®šæ—¶é—´å°äºä¸»é“¾çš„é•¿åº¦ï¼Œåˆ™è¯´æ˜æ˜¯æœ€ç»ˆçš„äº¤æ˜“
         if (nLockTime == 0 || nLockTime < nBestHeight)
             return true;
         foreach(const CTxIn& txin, vin)
@@ -411,7 +411,7 @@ public:
                 return false;
         return true;
     }
-	// ¶Ô±ÈÏàÍ¬µÄ½»Ò×ÄÄÒ»¸ö¸üĞÂµã£º¶ÔÓÚÏàÍ¬ÊäÈëµÄ½»Ò×ÅĞ¶ÏÄÄÒ»¸ö¸üĞÂ
+	// å¯¹æ¯”ç›¸åŒçš„äº¤æ˜“å“ªä¸€ä¸ªæ›´æ–°ç‚¹ï¼šå¯¹äºç›¸åŒè¾“å…¥çš„äº¤æ˜“åˆ¤æ–­å“ªä¸€ä¸ªæ›´æ–°
     bool IsNewerThan(const CTransaction& old) const
     {
         if (vin.size() != old.vin.size())
@@ -441,16 +441,16 @@ public:
         return fNewer;
     }
 
-	// ÅĞ¶Ïµ±Ç°½»Ò×ÊÇ·ñÊÇ±Ò»ù½»Ò×£º±Ò»ù½»Ò×µÄÌØµãÊÇ½»Ò×ÊäÈë´óĞ¡Îª1£¬µ«ÊÇ¶ÔÓ¦µÄÊäÈëµÄÊä³öÎª¿Õ
+	// åˆ¤æ–­å½“å‰äº¤æ˜“æ˜¯å¦æ˜¯å¸åŸºäº¤æ˜“ï¼šå¸åŸºäº¤æ˜“çš„ç‰¹ç‚¹æ˜¯äº¤æ˜“è¾“å…¥å¤§å°ä¸º1ï¼Œä½†æ˜¯å¯¹åº”çš„è¾“å…¥çš„è¾“å‡ºä¸ºç©º
     bool IsCoinBase() const
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
-	/* ¶ÔÕâ±ß½»Ò×½øĞĞ¼ì²é£º
-	(1)½»Ò×¶ÔÓ¦µÄÊäÈë»òÕßÊä³öÁĞ±í¶¼²»ÄÜÎª¿Õ
-	(2)½»Ò×¶ÔÓ¦µÄÊä³ö½ğ¶î²»ÄÜĞ¡ÓÚ0
-	(3)Èç¹ûÊÇ±Ò»ù½»Ò×£¬Ôò¶ÔÓ¦µÄÊäÈëÖ»ÄÜÎª1£¬ÇÒ¶ÔÓ¦µÄÊäÈëÇ©Ãû´óĞ¡²»ÄÜ´óÓÚ100
-	(4)Èç¹ûÊÇ·Ç±Ò»ù½»Ò×£¬Ôò¶ÔÓ¦µÄ½»Ò×ÊäÈëµÄÊä³ö²»ÄÜÎª¿Õ
+	/* å¯¹è¿™è¾¹äº¤æ˜“è¿›è¡Œæ£€æŸ¥ï¼š
+	(1)äº¤æ˜“å¯¹åº”çš„è¾“å…¥æˆ–è€…è¾“å‡ºåˆ—è¡¨éƒ½ä¸èƒ½ä¸ºç©º
+	(2)äº¤æ˜“å¯¹åº”çš„è¾“å‡ºé‡‘é¢ä¸èƒ½å°äº0
+	(3)å¦‚æœæ˜¯å¸åŸºäº¤æ˜“ï¼Œåˆ™å¯¹åº”çš„è¾“å…¥åªèƒ½ä¸º1ï¼Œä¸”å¯¹åº”çš„è¾“å…¥ç­¾åå¤§å°ä¸èƒ½å¤§äº100
+	(4)å¦‚æœæ˜¯éå¸åŸºäº¤æ˜“ï¼Œåˆ™å¯¹åº”çš„äº¤æ˜“è¾“å…¥çš„è¾“å‡ºä¸èƒ½ä¸ºç©º
 	*/
     bool CheckTransaction() const
     {
@@ -478,7 +478,7 @@ public:
         return true;
     }
 
-	// ÅĞ¶Ïµ±Ç°µÄ½»Ò×ÊÇ·ñ°üº¬½Úµã±¾ÉíµÄ½»Ò×£¨ÔÚÊä³öÁĞ±íÖĞ£©
+	// åˆ¤æ–­å½“å‰çš„äº¤æ˜“æ˜¯å¦åŒ…å«èŠ‚ç‚¹æœ¬èº«çš„äº¤æ˜“ï¼ˆåœ¨è¾“å‡ºåˆ—è¡¨ä¸­ï¼‰
     bool IsMine() const
     {
         foreach(const CTxOut& txout, vout)
@@ -487,7 +487,7 @@ public:
         return false;
     }
 
-	// »ñµÃµ±Ç°½»Ò××ÜµÄÊäÈë£º½è·½
+	// è·å¾—å½“å‰äº¤æ˜“æ€»çš„è¾“å…¥ï¼šå€Ÿæ–¹
     int64 GetDebit() const
     {
         int64 nDebit = 0;
@@ -496,7 +496,7 @@ public:
         return nDebit;
     }
 
-	// »ñµÃµ±Ç°½»Ò××ÜµÄ´û·½½ğ¶î£ºÊôÓÚ½Úµã×ÔÉíµÄ
+	// è·å¾—å½“å‰äº¤æ˜“æ€»çš„è´·æ–¹é‡‘é¢ï¼šå±äºèŠ‚ç‚¹è‡ªèº«çš„
     int64 GetCredit() const
     {
         int64 nCredit = 0;
@@ -504,7 +504,7 @@ public:
             nCredit += txout.GetCredit();
         return nCredit;
     }
-	// »ñÈ¡½»Ò×¶ÔÓ¦ËùÓĞÊä³ö½ğ¶îÖ®ºÍ
+	// è·å–äº¤æ˜“å¯¹åº”æ‰€æœ‰è¾“å‡ºé‡‘é¢ä¹‹å’Œ
     int64 GetValueOut() const
     {
         int64 nValueOut = 0;
@@ -516,7 +516,7 @@ public:
         }
         return nValueOut;
     }
-	// »ñÈ¡½»Ò×¶ÔÓ¦µÄ×îĞ¡½»Ò×·Ñ£º´óĞ¡Ğ¡ÓÚ10000×Ö½ÚÔò¶ÔÓ¦µÄ×îĞ¡½»Ò×·ÑÎª0£¬·ñÔòÎª°´ÕÕ´óĞ¡½øĞĞ¼ÆËã½»Ò×·Ñ
+	// è·å–äº¤æ˜“å¯¹åº”çš„æœ€å°äº¤æ˜“è´¹ï¼šå¤§å°å°äº10000å­—èŠ‚åˆ™å¯¹åº”çš„æœ€å°äº¤æ˜“è´¹ä¸º0ï¼Œå¦åˆ™ä¸ºæŒ‰ç…§å¤§å°è¿›è¡Œè®¡ç®—äº¤æ˜“è´¹
 	// Transaction fee requirements, mainly only needed for flood control
 	// Under 10K (about 80 inputs) is free for first 100 transactions
 	// Base rate is 0.01 per KB
@@ -528,7 +528,7 @@ public:
         return (1 + (int64)nBytes / 1000) * CENT;
     }
 
-	// ´ÓÓ²ÅÌÖĞ½øĞĞ¶ÁÈ¡
+	// ä»ç¡¬ç›˜ä¸­è¿›è¡Œè¯»å–
     bool ReadFromDisk(CDiskTxPos pos, FILE** pfileRet=NULL)
     {
         CAutoFile filein = OpenBlockFile(pos.nFile, 0, pfileRet ? "rb+" : "rb");
@@ -587,13 +587,13 @@ public:
     }
 
 
-	// ¶Ï¿ªÁ¬½Ó£ºÊÍ·Å½»Ò×¶ÔÓ¦ÊäÈëµÄÕ¼ÓÃºÍ½«½»Ò×´Ó¶ÔÓ¦µÄ½»Ò×Ë÷Òı±íÖĞÊÍ·Åµô
+	// æ–­å¼€è¿æ¥ï¼šé‡Šæ”¾äº¤æ˜“å¯¹åº”è¾“å…¥çš„å ç”¨å’Œå°†äº¤æ˜“ä»å¯¹åº”çš„äº¤æ˜“ç´¢å¼•è¡¨ä¸­é‡Šæ”¾æ‰
     bool DisconnectInputs(CTxDB& txdb);
-	// ½»Ò×ÊäÈëÁ´½Ó£¬½«¶ÔÓ¦µÄ½»Ò×ÊäÈëÕ¼ÓÃ¶ÔÓ¦µÄ½»Ò×ÊäÈëµÄ»¨·Ñ±ê¼Ç
+	// äº¤æ˜“è¾“å…¥é“¾æ¥ï¼Œå°†å¯¹åº”çš„äº¤æ˜“è¾“å…¥å ç”¨å¯¹åº”çš„äº¤æ˜“è¾“å…¥çš„èŠ±è´¹æ ‡è®°
     bool ConnectInputs(CTxDB& txdb, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos posThisTx, int nHeight, int64& nFees, bool fBlock, bool fMiner, int64 nMinFee=0);
-	// ¿Í»§¶ËÁ¬½ÓÊäÈë£¬¶Ô½»Ò×±¾Éí½øĞĞÑéÖ¤
+	// å®¢æˆ·ç«¯è¿æ¥è¾“å…¥ï¼Œå¯¹äº¤æ˜“æœ¬èº«è¿›è¡ŒéªŒè¯
 	bool ClientConnectInputs();
-	// ÅĞ¶ÏÕâ±Ê½»Ò×ÊÇ·ñÓ¦¸Ã±»½ÓÊÜ
+	// åˆ¤æ–­è¿™ç¬”äº¤æ˜“æ˜¯å¦åº”è¯¥è¢«æ¥å—
     bool AcceptTransaction(CTxDB& txdb, bool fCheckInputs=true, bool* pfMissingInputs=NULL);
 
     bool AcceptTransaction(bool fCheckInputs=true, bool* pfMissingInputs=NULL)
@@ -603,10 +603,10 @@ public:
     }
 
 protected:
-	// ½«µ±Ç°½»Ò×Ôö¼Óµ½ÄÚ´æ³ØmapTransactions,mapNextTxÖĞ£¬²¢ÇÒ¸üĞÂ½»Ò×¸üĞÂµÄ´ÎÊı
+	// å°†å½“å‰äº¤æ˜“å¢åŠ åˆ°å†…å­˜æ± mapTransactions,mapNextTxä¸­ï¼Œå¹¶ä¸”æ›´æ–°äº¤æ˜“æ›´æ–°çš„æ¬¡æ•°
     bool AddToMemoryPool();
 public:
-	// ½«µ±Ç°½»Ò×´ÓÄÚ´æ¶ÔÏómapTransactions£¬mapNextTxÖĞÒÆ³ı£¬²¢ÇÒÔö¼Ó½»Ò×¶ÔÓ¦µÄ¸üĞÂ´ÎÊı
+	// å°†å½“å‰äº¤æ˜“ä»å†…å­˜å¯¹è±¡mapTransactionsï¼ŒmapNextTxä¸­ç§»é™¤ï¼Œå¹¶ä¸”å¢åŠ äº¤æ˜“å¯¹åº”çš„æ›´æ–°æ¬¡æ•°
     bool RemoveFromMemoryPool();
 };
 
@@ -620,12 +620,12 @@ public:
 class CMerkleTx : public CTransaction
 {
 public:
-    uint256 hashBlock;// ½»Ò×ËùÔÚblock¶ÔÓ¦µÄhashÖµ£¬ÒòÎªblockÖĞÓĞ¶ÔÓ¦Õû¸ö½»Ò×µÄÄ¬¿Ë¶ûÊ÷£¬ÕâÑù²ÅÄÜ¸ù¾İ·ÖÖ§À´Ğ£Ñéµ±Ç°½»Ò×ÊÇ·ñÔÚblockÖĞ
-    vector<uint256> vMerkleBranch; // µ±Ç°½»Ò×¶ÔÓ¦µÄÄ¬¿Ë¶û·ÖÖ§
-    int nIndex;// µ±Ç°½»Ò×ÔÚ¶ÔÓ¦µÄblock¶ÔÓ¦µÄÊäÈëvtxÁĞ±íÖĞµÄË÷Òı£¬CMerkleTx¾ÍÊÇ¸ù¾İË÷ÒıÀ´¼ÆËãÕâ¸ö½»Ò×¶ÔÓ¦µÄÄ¬¿Ë¶ûÊ÷·ÖÖ§µÄ
+    uint256 hashBlock;// äº¤æ˜“æ‰€åœ¨blockå¯¹åº”çš„hashå€¼ï¼Œå› ä¸ºblockä¸­æœ‰å¯¹åº”æ•´ä¸ªäº¤æ˜“çš„é»˜å…‹å°”æ ‘ï¼Œè¿™æ ·æ‰èƒ½æ ¹æ®åˆ†æ”¯æ¥æ ¡éªŒå½“å‰äº¤æ˜“æ˜¯å¦åœ¨blockä¸­
+    vector<uint256> vMerkleBranch; // å½“å‰äº¤æ˜“å¯¹åº”çš„é»˜å…‹å°”åˆ†æ”¯
+    int nIndex;// å½“å‰äº¤æ˜“åœ¨å¯¹åº”çš„blockå¯¹åº”çš„è¾“å…¥vtxåˆ—è¡¨ä¸­çš„ç´¢å¼•ï¼ŒCMerkleTxå°±æ˜¯æ ¹æ®ç´¢å¼•æ¥è®¡ç®—è¿™ä¸ªäº¤æ˜“å¯¹åº”çš„é»˜å…‹å°”æ ‘åˆ†æ”¯çš„
 
     // memory only
-    mutable bool fMerkleVerified;// ±ê¼ÇÄ¬¿Ë¶û½»Ò×ÊÇ·ñÒÑ¾­Ğ£Ñé£¬Èç¹ûÃ»ÓĞĞ£ÑéÔò½øĞĞĞ£Ñé£¬Ğ£ÑéÖ®ºó½«Õâ¸öÖµÉèÎªtrue
+    mutable bool fMerkleVerified;// æ ‡è®°é»˜å…‹å°”äº¤æ˜“æ˜¯å¦å·²ç»æ ¡éªŒï¼Œå¦‚æœæ²¡æœ‰æ ¡éªŒåˆ™è¿›è¡Œæ ¡éªŒï¼Œæ ¡éªŒä¹‹åå°†è¿™ä¸ªå€¼è®¾ä¸ºtrue
 
 
     CMerkleTx()
@@ -645,7 +645,7 @@ public:
         fMerkleVerified = false;
     }
 
-	// »ñÈ¡Ä¬¿Ë¶ûÊ÷¶ÔÓ¦µÄ´û·½½ğ¶îµÄÊ±ºò£¬¶ÔÓÚ±Ò»ù½»Ò×£¬Ò»¶¨ÒªµÈ¶ÔÓ¦µÄblock×ã¹»³ÉÊìÁË²ÅÄÜÊ¹ÓÃ
+	// è·å–é»˜å…‹å°”æ ‘å¯¹åº”çš„è´·æ–¹é‡‘é¢çš„æ—¶å€™ï¼Œå¯¹äºå¸åŸºäº¤æ˜“ï¼Œä¸€å®šè¦ç­‰å¯¹åº”çš„blockè¶³å¤Ÿæˆç†Ÿäº†æ‰èƒ½ä½¿ç”¨
     int64 GetCredit() const
     {
         // Must wait until coinbase is safely deep enough in the chain before valuing it
@@ -663,16 +663,16 @@ public:
         READWRITE(nIndex);
     )
 
-    // Èç¹û½»Ò×ÔÚ¶ÔÓ¦µÄÇø¿éÖĞ£¬ÔòÉèÖÃ½»Ò×¶ÔÓ¦µÄÄ¬¿Ë¶ûÊ÷·ÖÖ§
+    // å¦‚æœäº¤æ˜“åœ¨å¯¹åº”çš„åŒºå—ä¸­ï¼Œåˆ™è®¾ç½®äº¤æ˜“å¯¹åº”çš„é»˜å…‹å°”æ ‘åˆ†æ”¯
     int SetMerkleBranch(const CBlock* pblock=NULL);
-	//»ñÈ¡Ä¬¿Ë¶û½»Ò×ÔÚÖ÷Á´ÖĞµÄÉî¶È--µ±Ç°¿é¾àÀë×î³¤Á´Ä©Î²ÖĞ¼ä¸ôÁË¶àÉÙ¸öblock
+	//è·å–é»˜å…‹å°”äº¤æ˜“åœ¨ä¸»é“¾ä¸­çš„æ·±åº¦--å½“å‰å—è·ç¦»æœ€é•¿é“¾æœ«å°¾ä¸­é—´éš”äº†å¤šå°‘ä¸ªblock
     int GetDepthInMainChain() const;
-	// ÅĞ¶Ïµ±Ç°½»Ò×ÊÇ·ñÔÚÖ÷Á´ÉÏ
+	// åˆ¤æ–­å½“å‰äº¤æ˜“æ˜¯å¦åœ¨ä¸»é“¾ä¸Š
     bool IsInMainChain() const { return GetDepthInMainChain() > 0; }
-	// ÅĞ¶Ï¶ÔÓ¦µÄ¿éÊÇ·ñ³ÉÊì£¬¼´ÊÇ±»ÆäËû¿ó¹¤Ëù½ÓÊÜÈÏ¿É£¬Èç¹ûÊÇ·Ç±Ò»ù½»Ò×¶ÔÓ¦µÄÎª¿é³ÉÊì¶ÈÎª0£¬·ñÔòÒª½øĞĞ¼ÆËã
-    // ³ÉÊì¶ÈÔ½Ğ¡Ô½ºÃ£¬ËµÃ÷µ±Ç°½»Ò×±»ÈÏ¿ÉµÄ¶ÈÔ½¸ß
+	// åˆ¤æ–­å¯¹åº”çš„å—æ˜¯å¦æˆç†Ÿï¼Œå³æ˜¯è¢«å…¶ä»–çŸ¿å·¥æ‰€æ¥å—è®¤å¯ï¼Œå¦‚æœæ˜¯éå¸åŸºäº¤æ˜“å¯¹åº”çš„ä¸ºå—æˆç†Ÿåº¦ä¸º0ï¼Œå¦åˆ™è¦è¿›è¡Œè®¡ç®—
+    // æˆç†Ÿåº¦è¶Šå°è¶Šå¥½ï¼Œè¯´æ˜å½“å‰äº¤æ˜“è¢«è®¤å¯çš„åº¦è¶Šé«˜
     int GetBlocksToMaturity() const;
-	// ÅĞ¶ÏÕâ±ß½»Ò×ÄÜ²»ÄÜ±»½ÓÊÜ£¬Èç¹ûÄÜ½ÓÊÜ½«¶ÔÓ¦µÄ½»Ò×·ÅÈëÈ«¾Ö±äÁ¿ÖĞmapTransactions£¬mapNextTxÖĞ
+	// åˆ¤æ–­è¿™è¾¹äº¤æ˜“èƒ½ä¸èƒ½è¢«æ¥å—ï¼Œå¦‚æœèƒ½æ¥å—å°†å¯¹åº”çš„äº¤æ˜“æ”¾å…¥å…¨å±€å˜é‡ä¸­mapTransactionsï¼ŒmapNextTxä¸­
     bool AcceptTransaction(CTxDB& txdb, bool fCheckInputs=true);
     bool AcceptTransaction() { CTxDB txdb("r"); return AcceptTransaction(txdb); }
 };
@@ -688,20 +688,20 @@ public:
 class CWalletTx : public CMerkleTx
 {
 public:
-    vector<CMerkleTx> vtxPrev; // µ±Ç°½»Ò×A¶ÔÓ¦µÄÊäÈë¶ÔÓ¦µÄ½»Ò×B£¬Èç¹ûBËùÔÚblockµ½×î³¤Á´Ä©Î²µÄ³¤¶ÈĞ¡ÓÚ3£¬Ôò½«´Î½»Ò×·ÅÈë
+    vector<CMerkleTx> vtxPrev; // å½“å‰äº¤æ˜“Aå¯¹åº”çš„è¾“å…¥å¯¹åº”çš„äº¤æ˜“Bï¼Œå¦‚æœBæ‰€åœ¨blockåˆ°æœ€é•¿é“¾æœ«å°¾çš„é•¿åº¦å°äº3ï¼Œåˆ™å°†æ¬¡äº¤æ˜“æ”¾å…¥
     /*
-	Ö÷ÒªÓÃÓÚ´æ·ÅÒ»ÏÂ×Ô¶¨ÒåµÄÖµ
+	ä¸»è¦ç”¨äºå­˜æ”¾ä¸€ä¸‹è‡ªå®šä¹‰çš„å€¼
 	wtx.mapValue["to"] = strAddress;
 	wtx.mapValue["from"] = m_textCtrlFrom->GetValue();
 	wtx.mapValue["message"] = m_textCtrlMessage->GetValue();
 	*/
 	map<string, string> mapValue;
-	// ±íµ¥¿Ø¼şĞÅÏ¢
+	// è¡¨å•æ§ä»¶ä¿¡æ¯
     vector<pair<string, string> > vOrderForm;
-    unsigned int fTimeReceivedIsTxTime;// ½ÓÊÕÊ±¼äÊÇ·ñÊÇ½»Ò×Ê±¼ä±ê¼Ç
-    unsigned int nTimeReceived;  // time received by this node ½»Ò×±»Õâ¸ö½Úµã½ÓÊÕµÄÊ±¼ä
+    unsigned int fTimeReceivedIsTxTime;// æ¥æ”¶æ—¶é—´æ˜¯å¦æ˜¯äº¤æ˜“æ—¶é—´æ ‡è®°
+    unsigned int nTimeReceived;  // time received by this node äº¤æ˜“è¢«è¿™ä¸ªèŠ‚ç‚¹æ¥æ”¶çš„æ—¶é—´
     char fFromMe;
-    char fSpent; // ÊÇ·ñ»¨·Ñ½»Ò×±ê¼Ç
+    char fSpent; // æ˜¯å¦èŠ±è´¹äº¤æ˜“æ ‡è®°
     //// probably need to sign the order info so know it came from payer
 
     // memory only
@@ -750,14 +750,14 @@ public:
         return CWalletDB().WriteTx(GetHash(), *this);
     }
 
-	// »ñÈ¡½»Ò×Ê±¼ä
+	// è·å–äº¤æ˜“æ—¶é—´
     int64 GetTxTime() const;
-	// Ôö¼ÓÖ§³ÖµÄ½»Ò×
+	// å¢åŠ æ”¯æŒçš„äº¤æ˜“
     void AddSupportingTransactions(CTxDB& txdb);
-	// ÅĞ¶Ïµ±Ç°½»Ò×ÄÜ¹»±»½ÓÊÕ
+	// åˆ¤æ–­å½“å‰äº¤æ˜“èƒ½å¤Ÿè¢«æ¥æ”¶
     bool AcceptWalletTransaction(CTxDB& txdb, bool fCheckInputs=true);
     bool AcceptWalletTransaction() { CTxDB txdb("r"); return AcceptWalletTransaction(txdb); }
-	// ×ª²¥Ç®°ü½»Ò×
+	// è½¬æ’­é’±åŒ…äº¤æ˜“
     void RelayWalletTransaction(CTxDB& txdb);
     void RelayWalletTransaction() { CTxDB txdb("r"); RelayWalletTransaction(txdb); }
 };
@@ -770,12 +770,12 @@ public:
 // locations of transactions that spend its outputs.  vSpent is really only
 // used as a flag, but having the location is very helpful for debugging.
 //
-// ½»Ò×Ë÷Òı---Ã¿Ò»¸ö½»Ò×¶ÔÓ¦Ò»¸öË÷Òı
+// äº¤æ˜“ç´¢å¼•---æ¯ä¸€ä¸ªäº¤æ˜“å¯¹åº”ä¸€ä¸ªç´¢å¼•
 class CTxIndex
 {
 public:
-    CDiskTxPos pos; // ½»Ò×¶ÔÓ¦µÄÔÚÓ²ÅÌÖĞÎÄ¼şµÄÎ»ÖÃ
-    vector<CDiskTxPos> vSpent; // ±ê¼Ç½»Ò×µÄÊä³öÊÇ·ñÒÑ¾­±»Ïû·ÑÁË£¬¸ù¾İÏÂ±êÀ´±ê¼Ç¶ÔÓ¦½»Ò×Ö¸¶¨Î»ÖÃµÄÊä³öÊÇ·ñÒÑ¾­±»Ïû·ÑÁË
+    CDiskTxPos pos; // äº¤æ˜“å¯¹åº”çš„åœ¨ç¡¬ç›˜ä¸­æ–‡ä»¶çš„ä½ç½®
+    vector<CDiskTxPos> vSpent; // æ ‡è®°äº¤æ˜“çš„è¾“å‡ºæ˜¯å¦å·²ç»è¢«æ¶ˆè´¹äº†ï¼Œæ ¹æ®ä¸‹æ ‡æ¥æ ‡è®°å¯¹åº”äº¤æ˜“æŒ‡å®šä½ç½®çš„è¾“å‡ºæ˜¯å¦å·²ç»è¢«æ¶ˆè´¹äº†
 
     CTxIndex()
     {
@@ -838,24 +838,24 @@ public:
 // Blocks are appended to blk0001.dat files on disk.  Their location on disk
 // is indexed by CBlockIndex objects in memory.
 //
-// ¿é¶¨Òå
+// å—å®šä¹‰
 class CBlock
 {
 public:
     // header
-    int nVersion; // ¿éµÄ°æ±¾£¬Ö÷ÒªÎªÁËºóĞøµÄÉı¼¶Ê¹ÓÃ
-    uint256 hashPrevBlock; // Ç°Ò»¸ö¿é¶ÔÓ¦µÄhash
-    uint256 hashMerkleRoot; // Ä¬¿Ë¶û¶ÔÓ¦µÄ¸ù
-	// È¡Ç°11¸öÇø¿é¶ÔÓ¦µÄ´´½¨Ê±¼äÖĞÎ»Êı
-    unsigned int nTime; // µ¥Î»ÎªÃë£¬È¡Çø¿éÁ´ÖĞ¶ÔÓ¦µÄÇ°¶àÉÙ¸öÇø¿é¶ÔÓ¦Ê±¼äµÄÖĞÎ»Êı£¬Èç¹û²»´æÔÚÇ°Ò»¸öÔòÈ¥µ±Ç°Ê±¼ä
-    unsigned int nBits; // ¼ÇÂ¼±¾Çø¿éÄÑ¶È
-    unsigned int nNonce; // ¹¤×÷Á¿Ö¤Ã÷»ñµÃËæ»úÊı£¬Õâ¸öËæ»úÊıÕıºÃÂú×ãµ±Ç°ÍÚ¿ó¶ÔÓ¦µÄÄÑ¶È
+    int nVersion; // å—çš„ç‰ˆæœ¬ï¼Œä¸»è¦ä¸ºäº†åç»­çš„å‡çº§ä½¿ç”¨
+    uint256 hashPrevBlock; // å‰ä¸€ä¸ªå—å¯¹åº”çš„hash
+    uint256 hashMerkleRoot; // é»˜å…‹å°”å¯¹åº”çš„æ ¹
+	// å–å‰11ä¸ªåŒºå—å¯¹åº”çš„åˆ›å»ºæ—¶é—´ä¸­ä½æ•°
+    unsigned int nTime; // å•ä½ä¸ºç§’ï¼Œå–åŒºå—é“¾ä¸­å¯¹åº”çš„å‰å¤šå°‘ä¸ªåŒºå—å¯¹åº”æ—¶é—´çš„ä¸­ä½æ•°ï¼Œå¦‚æœä¸å­˜åœ¨å‰ä¸€ä¸ªåˆ™å»å½“å‰æ—¶é—´
+    unsigned int nBits; // è®°å½•æœ¬åŒºå—éš¾åº¦
+    unsigned int nNonce; // å·¥ä½œé‡è¯æ˜è·å¾—éšæœºæ•°ï¼Œè¿™ä¸ªéšæœºæ•°æ­£å¥½æ»¡è¶³å½“å‰æŒ–çŸ¿å¯¹åº”çš„éš¾åº¦
 
     // network and disk
-    vector<CTransaction> vtx; // ¿éÖĞ½»Ò×ÁĞ±í
+    vector<CTransaction> vtx; // å—ä¸­äº¤æ˜“åˆ—è¡¨
 
     // memory only
-    mutable vector<uint256> vMerkleTree; // Õû¸ö½»Ò×¶ÔÓ¦µÄÄ¬¿Ë¶ûÊ÷ÁĞ±í
+    mutable vector<uint256> vMerkleTree; // æ•´ä¸ªäº¤æ˜“å¯¹åº”çš„é»˜å…‹å°”æ ‘åˆ—è¡¨
 
 
     CBlock()
@@ -897,13 +897,13 @@ public:
         return (nBits == 0);
     }
 
-	// ¿éhashÖµ½ö½ö°üº¬´ÓnVersion µ½ nNonce µÄÖµ
+	// å—hashå€¼ä»…ä»…åŒ…å«ä»nVersion åˆ° nNonce çš„å€¼
     uint256 GetHash() const
     {
         return Hash(BEGIN(nVersion), END(nNonce));
     }
 
-	// ¸ù¾İ½»Ò×¹¹½¨¶ÔÓ¦µÄÄ¬¿Ë¶ûÊ÷
+	// æ ¹æ®äº¤æ˜“æ„å»ºå¯¹åº”çš„é»˜å…‹å°”æ ‘
     uint256 BuildMerkleTree() const
     {
         vMerkleTree.clear();
@@ -918,11 +918,11 @@ public:
                 vMerkleTree.push_back(Hash(BEGIN(vMerkleTree[j+i]),  END(vMerkleTree[j+i]),
                                            BEGIN(vMerkleTree[j+i2]), END(vMerkleTree[j+i2])));
             }
-            j += nSize; // Ê÷µÄÉÏÒ»²ã¼¶
+            j += nSize; // æ ‘çš„ä¸Šä¸€å±‚çº§
         }
-        return (vMerkleTree.empty() ? 0 : vMerkleTree.back()); //·µ»ØvMerkleTree[-1]£¬¼´Merkleroot
+        return (vMerkleTree.empty() ? 0 : vMerkleTree.back()); //è¿”å›vMerkleTree[-1]ï¼Œå³Merkleroot
     }
-	// ¸ù¾İ½»Ò×¶ÔÓ¦µÄË÷Òı»ñµÃ½»Ò×¶ÔÓ¦µÄÄ¬¿Ë¶û·ÖÖ§
+	// æ ¹æ®äº¤æ˜“å¯¹åº”çš„ç´¢å¼•è·å¾—äº¤æ˜“å¯¹åº”çš„é»˜å…‹å°”åˆ†æ”¯
     vector<uint256> GetMerkleBranch(int nIndex) const
     {
         if (vMerkleTree.empty())
@@ -931,14 +931,14 @@ public:
         int j = 0;
         for (int nSize = vtx.size(); nSize > 1; nSize = (nSize + 1) / 2)
         {
-            int i = min(nIndex^1, nSize-1); // nindex^1ÊÇÒì»ò²Ù×÷£¬È¡ÁÚ½Úµã
+            int i = min(nIndex^1, nSize-1); // nindex^1æ˜¯å¼‚æˆ–æ“ä½œï¼Œå–é‚»èŠ‚ç‚¹
             vMerkleBranch.push_back(vMerkleTree[j+i]);
-            nIndex >>= 1; // ÓÒÒÆÒ»Î»£¬³ıÒÔ¶ş
-            j += nSize; // Ê÷µÄÉÏÒ»²ã¼¶
+            nIndex >>= 1; // å³ç§»ä¸€ä½ï¼Œé™¤ä»¥äºŒ
+            j += nSize; // æ ‘çš„ä¸Šä¸€å±‚çº§
         }
         return vMerkleBranch;
     }
-	// ÅĞ¶Ïµ±Ç°¶ÔÓ¦µÄ½»Ò×hashºÍÄ¬¿Ë¶û·ÖÖ§À´ÑéÖ¤¶ÔÓ¦µÄ½»Ò×ÊÇ·ñÔÚ¶ÔÓ¦µÄblcokÖĞ
+	// åˆ¤æ–­å½“å‰å¯¹åº”çš„äº¤æ˜“hashå’Œé»˜å…‹å°”åˆ†æ”¯æ¥éªŒè¯å¯¹åº”çš„äº¤æ˜“æ˜¯å¦åœ¨å¯¹åº”çš„blcokä¸­
     static uint256 CheckMerkleBranch(uint256 hash, const vector<uint256>& vMerkleBranch, int nIndex)
     {
         if (nIndex == -1)
@@ -954,7 +954,7 @@ public:
         return hash;
     }
 
-	// ½«blockĞ´Èëµ½ÎÄ¼şÖĞ
+	// å°†blockå†™å…¥åˆ°æ–‡ä»¶ä¸­
     bool WriteToDisk(bool fWriteTransactions, unsigned int& nFileRet, unsigned int& nBlockPosRet)
     {
         // Open history file to append
@@ -966,21 +966,21 @@ public:
 
         // Write index header
         unsigned int nSize = fileout.GetSerializeSize(*this);
-		// ·ÅÈëÏûÏ¢Í·ºÍ¶ÔÓ¦¿éµÄ´óĞ¡Öµ
+		// æ”¾å…¥æ¶ˆæ¯å¤´å’Œå¯¹åº”å—çš„å¤§å°å€¼
         fileout << FLATDATA(pchMessageStart) << nSize;
 
         // Write block
-        // nBlockPosRet ´ú±íÇø¿éÔÚÎÄ¼şÖĞµÄÎ»ÖÃ
+        // nBlockPosRet ä»£è¡¨åŒºå—åœ¨æ–‡ä»¶ä¸­çš„ä½ç½®
         nBlockPosRet = ftell(fileout);
         if (nBlockPosRet == -1)
             return error("CBlock::WriteToDisk() : ftell failed");
-		// ½«blockµÄÄÚÈİĞ´Èëµ½ÎÄ¼şÖĞ
+		// å°†blockçš„å†…å®¹å†™å…¥åˆ°æ–‡ä»¶ä¸­
         fileout << *this;
 
         return true;
     }
 
-	// ´ÓÎÄ¼şÖĞ¶ÁÈ¡¿éĞÅÏ¢
+	// ä»æ–‡ä»¶ä¸­è¯»å–å—ä¿¡æ¯
     bool ReadFromDisk(unsigned int nFile, unsigned int nBlockPos, bool fReadTransactions)
     {
         SetNull();
@@ -992,10 +992,10 @@ public:
         if (!fReadTransactions)
             filein.nType |= SER_BLOCKHEADERONLY;
 
-        // Read block ½«ÎÄ¼şÖĞµÄÄÚÈİ¶ÁÈ¡µ½¿éÖĞ
+        // Read block å°†æ–‡ä»¶ä¸­çš„å†…å®¹è¯»å–åˆ°å—ä¸­
         filein >> *this;
 
-        // Check the header 1. ¹¤×÷Á¿Ö¤Ã÷ÄÑ¶È±È½Ï 2. ¼ÆËãµÄhashÖµÒªĞ¡ÓÚ¶ÔÓ¦µÄ¹¤×÷Á¿ÄÑ¶È
+        // Check the header 1. å·¥ä½œé‡è¯æ˜éš¾åº¦æ¯”è¾ƒ 2. è®¡ç®—çš„hashå€¼è¦å°äºå¯¹åº”çš„å·¥ä½œé‡éš¾åº¦
         if (CBigNum().SetCompact(nBits) > bnProofOfWorkLimit)
             return error("CBlock::ReadFromDisk() : nBits errors in block header");
         if (GetHash() > CBigNum().SetCompact(nBits).getuint256())
@@ -1026,19 +1026,19 @@ public:
         printf("\n");
     }
 
-	// »ñÈ¡Õâ¸öÇø¿é¶ÔÓ¦µÄ¼ÛÖµ£¨½±Àø+½»Ò×ÊÖĞø·Ñ£©
+	// è·å–è¿™ä¸ªåŒºå—å¯¹åº”çš„ä»·å€¼ï¼ˆå¥–åŠ±+äº¤æ˜“æ‰‹ç»­è´¹ï¼‰
     int64 GetBlockValue(int64 nFees) const;
-	// ½«Ò»¸öÇø¿éblock¶Ï¿ªÁ¬½Ó£¨¾ÍÊÇÊÍ·ÅÇø¿é¶ÔÓ¦µÄĞÅÏ¢£¬Í¬Ê±ÊÍ·ÅÇø¿é¶ÔÓ¦µÄÇø¿éË÷Òı£©
+	// å°†ä¸€ä¸ªåŒºå—blockæ–­å¼€è¿æ¥ï¼ˆå°±æ˜¯é‡Šæ”¾åŒºå—å¯¹åº”çš„ä¿¡æ¯ï¼ŒåŒæ—¶é‡Šæ”¾åŒºå—å¯¹åº”çš„åŒºå—ç´¢å¼•ï¼‰
     bool DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex);
-	// Çø¿éÁ´½Ó£ºÃ¿Ò»¸ö½»Ò×Á´½Ó£¬Ôö¼Óµ½Çø¿éË÷ÒıÁ´ÖĞ
+	// åŒºå—é“¾æ¥ï¼šæ¯ä¸€ä¸ªäº¤æ˜“é“¾æ¥ï¼Œå¢åŠ åˆ°åŒºå—ç´¢å¼•é“¾ä¸­
     bool ConnectBlock(CTxDB& txdb, CBlockIndex* pindex);
-	// ¸ù¾İÇø¿éË÷Òı´ÓÊı¾İ¿âÎÄ¼şÖĞ¶ÁÈ¡¶ÔÓ¦µÄÇø¿éĞÅÏ¢
+	// æ ¹æ®åŒºå—ç´¢å¼•ä»æ•°æ®åº“æ–‡ä»¶ä¸­è¯»å–å¯¹åº”çš„åŒºå—ä¿¡æ¯
     bool ReadFromDisk(const CBlockIndex* blockindex, bool fReadTransactions);
-	// ½«µ±Ç°Çø¿éÔö¼Óµ½¶ÔÓ¦µÄÇø¿éË÷ÒıÖĞ
+	// å°†å½“å‰åŒºå—å¢åŠ åˆ°å¯¹åº”çš„åŒºå—ç´¢å¼•ä¸­
     bool AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos);
-	// Çø¿éĞ£Ñé
+	// åŒºå—æ ¡éªŒ
     bool CheckBlock() const;
-	// ÅĞ¶Ïµ±Ç°Çø¿éÄÜ¹»±»½ÓÊÕ
+	// åˆ¤æ–­å½“å‰åŒºå—èƒ½å¤Ÿè¢«æ¥æ”¶
     bool AcceptBlock();
 };
 
@@ -1055,25 +1055,25 @@ public:
 // to it, but pnext will only point forward to the longest branch, or will
 // be null if the block is not part of the longest chain.
 //
-// Èç¹û¿éË÷Òı¶ÔÓ¦µÄpNext²»Îª¿Õ£¬ÔòÕâ¸ö¿éË÷ÒıÒ»¶¨¶ÔÓ¦µÄÊÇÖ÷Á´
-// ¿éË÷Òı
+// å¦‚æœå—ç´¢å¼•å¯¹åº”çš„pNextä¸ä¸ºç©ºï¼Œåˆ™è¿™ä¸ªå—ç´¢å¼•ä¸€å®šå¯¹åº”çš„æ˜¯ä¸»é“¾
+// å—ç´¢å¼•
 class CBlockIndex
 {
 public:
-    const uint256* phashBlock; // ¶ÔÓ¦¿éhashÖµÖ¸Õë
-    CBlockIndex* pprev; // Ö¸ÏòÇ°Ò»¸öblockIndex
-    CBlockIndex* pnext; // Ö¸Ïòµ±Ç°Çø¿éË÷ÒıµÄÏÂÒ»¸ö£¬Ö»ÓĞµ±Ç°Çø¿éË÷ÒıÔÚÖ÷Á´ÉÏµÄÊ±ºò£¬Õâ¸öÖµ²ÅÊÇ·Ç¿Õ
-	// ¿éËùÔÚÎÄ¼şÖĞµÄĞÅÏ¢
+    const uint256* phashBlock; // å¯¹åº”å—hashå€¼æŒ‡é’ˆ
+    CBlockIndex* pprev; // æŒ‡å‘å‰ä¸€ä¸ªblockIndex
+    CBlockIndex* pnext; // æŒ‡å‘å½“å‰åŒºå—ç´¢å¼•çš„ä¸‹ä¸€ä¸ªï¼Œåªæœ‰å½“å‰åŒºå—ç´¢å¼•åœ¨ä¸»é“¾ä¸Šçš„æ—¶å€™ï¼Œè¿™ä¸ªå€¼æ‰æ˜¯éç©º
+	// å—æ‰€åœ¨æ–‡ä»¶ä¸­çš„ä¿¡æ¯
     unsigned int nFile; 
     unsigned int nBlockPos;
-    int nHeight; // ¿éË÷ÒıÔÚ×î³¤Á´µÄÉî¶È£¬¼´ÊÇÖĞ¼ä¸ôÁË¶àÉÙ¸öblock£¬¼´ÊÇ´Ó´´ÊÀÇø¿éµ½µ±Ç°Çø¿éÖĞ¼ä¸ôÁË¶àÉÙ¸öÇø¿é
+    int nHeight; // å—ç´¢å¼•åœ¨æœ€é•¿é“¾çš„æ·±åº¦ï¼Œå³æ˜¯ä¸­é—´éš”äº†å¤šå°‘ä¸ªblockï¼Œå³æ˜¯ä»åˆ›ä¸–åŒºå—åˆ°å½“å‰åŒºå—ä¸­é—´éš”äº†å¤šå°‘ä¸ªåŒºå—
 
-    // block header ¿éµÄÍ·²¿ĞÅÏ¢
+    // block header å—çš„å¤´éƒ¨ä¿¡æ¯
     int nVersion;
     uint256 hashMerkleRoot;
-	// È¡Ç°11¸öÇø¿é¶ÔÓ¦µÄ´´½¨Ê±¼äÆ½¾ùÖµ
-    unsigned int nTime;// ¿é´´½¨Ê±¼ä£¬È¡¿éÁ´ÉÏÊ±¼äÖĞÎ»Êı
-    unsigned int nBits;// ¹¤×÷Á¿ÄÑ¶È
+	// å–å‰11ä¸ªåŒºå—å¯¹åº”çš„åˆ›å»ºæ—¶é—´å¹³å‡å€¼
+    unsigned int nTime;// å—åˆ›å»ºæ—¶é—´ï¼Œå–å—é“¾ä¸Šæ—¶é—´ä¸­ä½æ•°
+    unsigned int nBits;// å·¥ä½œé‡éš¾åº¦
     unsigned int nNonce;
 
 
@@ -1114,13 +1114,13 @@ public:
         return *phashBlock;
     }
 
-	// ÅĞ¶ÏÊÇ·ñÔÚÖ÷Á´£¬Í¨¹ıpnextÊÇ·ñÎª¿ÕºÍµ±Ç°¿éË÷ÒıÖ¸ÕëÊÇ·ñ¾ÍÊÇ×î³¤Á´Ö¸Õë
+	// åˆ¤æ–­æ˜¯å¦åœ¨ä¸»é“¾ï¼Œé€šè¿‡pnextæ˜¯å¦ä¸ºç©ºå’Œå½“å‰å—ç´¢å¼•æŒ‡é’ˆæ˜¯å¦å°±æ˜¯æœ€é•¿é“¾æŒ‡é’ˆ
     bool IsInMainChain() const
     {
         return (pnext || this == pindexBest);
     }
 
-	// ´ÓÎÄ¼şÖĞÒÆ³ı¶ÔÓ¦µÄ¿é
+	// ä»æ–‡ä»¶ä¸­ç§»é™¤å¯¹åº”çš„å—
     bool EraseBlockFromDisk()
     {
         // Open history file
@@ -1128,7 +1128,7 @@ public:
         if (!fileout)
             return false;
 
-		// ÔÚÎÄ¼ş¶ÔÓ¦µÄÎ»ÖÃÖØĞÂĞ´Ò»¸ö¿Õ¿é£¬ÕâÑù¾ÍÏàµ±ÓÚ´ÓÎÄ¼şÖĞÉ¾³ı¶ÔÓ¦µÄµ±ÆÚ¿é
+		// åœ¨æ–‡ä»¶å¯¹åº”çš„ä½ç½®é‡æ–°å†™ä¸€ä¸ªç©ºå—ï¼Œè¿™æ ·å°±ç›¸å½“äºä»æ–‡ä»¶ä¸­åˆ é™¤å¯¹åº”çš„å½“æœŸå—
         // Overwrite with empty null block
         CBlock block;
         block.SetNull();
@@ -1137,10 +1137,10 @@ public:
         return true;
     }
 
-	// È¡Ç°11¸öÇø¿é¶ÔÓ¦µÄ´´½¨Ê±¼äÆ½¾ùÖµ
+	// å–å‰11ä¸ªåŒºå—å¯¹åº”çš„åˆ›å»ºæ—¶é—´å¹³å‡å€¼
     enum { nMedianTimeSpan=11 };
 
-	// ´Óµ±Ç°¿éÍùÇ°ÍÆ£¬»ñÈ¡¹ıÈ¥¶ÔÓ¦µÄÖĞÎ»ÊıÊ±¼ä£¬ÔÚ¶ÔÓ¦µÄÇø¿éÁ´ÖĞ»ñÈ¡Ã¿Ò»¸öÇø¿é¶ÔÓ¦µÄÊ±¼ä£¬È»ºóÈ¡ÖĞÎ»Êı
+	// ä»å½“å‰å—å¾€å‰æ¨ï¼Œè·å–è¿‡å»å¯¹åº”çš„ä¸­ä½æ•°æ—¶é—´ï¼Œåœ¨å¯¹åº”çš„åŒºå—é“¾ä¸­è·å–æ¯ä¸€ä¸ªåŒºå—å¯¹åº”çš„æ—¶é—´ï¼Œç„¶åå–ä¸­ä½æ•°
     int64 GetMedianTimePast() const
     {
         unsigned int pmedian[nMedianTimeSpan];
@@ -1154,7 +1154,7 @@ public:
         sort(pbegin, pend);
         return pbegin[(pend - pbegin)/2];
     }
-	// ´Óµ±Ç°¿éÍùºóÍÆ£¬È¡ÖĞÎ»ÊıÊ±¼ä
+	// ä»å½“å‰å—å¾€åæ¨ï¼Œå–ä¸­ä½æ•°æ—¶é—´
     int64 GetMedianTime() const
     {
         const CBlockIndex* pindex = this;
@@ -1187,12 +1187,12 @@ public:
 
 //
 // Used to marshal pointers into hashes for db storage.
-// ÓÃÓÚ½«Ö¸ÕëÌæ»»³ÉhashÖµÓÃÓÚÊı¾İ¿â´æ´¢
+// ç”¨äºå°†æŒ‡é’ˆæ›¿æ¢æˆhashå€¼ç”¨äºæ•°æ®åº“å­˜å‚¨
 //
 class CDiskBlockIndex : public CBlockIndex
 {
 public:
-    uint256 hashPrev; // block¶ÔÓ¦µÄhashÖµ£¬½«Ö¸Õë±ä³É¶ÔÓ¦µÄhash
+    uint256 hashPrev; // blockå¯¹åº”çš„hashå€¼ï¼Œå°†æŒ‡é’ˆå˜æˆå¯¹åº”çš„hash
     uint256 hashNext;
 
     CDiskBlockIndex()
@@ -1235,7 +1235,7 @@ public:
         block.nTime           = nTime;
         block.nBits           = nBits;
         block.nNonce          = nNonce;
-        return block.GetHash(); // ¿éµÄhash½ö½ö°üº¬ÉÏÃæÕâĞ©ÄÚÈİ
+        return block.GetHash(); // å—çš„hashä»…ä»…åŒ…å«ä¸Šé¢è¿™äº›å†…å®¹
     }
 
 
@@ -1271,7 +1271,7 @@ public:
 class CBlockLocator
 {
 protected:
-    vector<uint256> vHave; // Çø¿éÁ´¶ÔÓ¦µÄblockË÷Òı
+    vector<uint256> vHave; // åŒºå—é“¾å¯¹åº”çš„blockç´¢å¼•
 public:
 
     CBlockLocator()
@@ -1305,22 +1305,22 @@ public:
         {
             vHave.push_back(pindex->GetBlockHash());
 
-			// Ö¸Êı¿ìËÙ»ØÍËËã·¨£ºÇ°10¸ö±£´æ£¬ºóÃæÊÇÖ¸Êı»ØÍËÒ»Ö±µ½Çø¿éÁ´Í·²¿ÎªÖ¹
+			// æŒ‡æ•°å¿«é€Ÿå›é€€ç®—æ³•ï¼šå‰10ä¸ªä¿å­˜ï¼Œåé¢æ˜¯æŒ‡æ•°å›é€€ä¸€ç›´åˆ°åŒºå—é“¾å¤´éƒ¨ä¸ºæ­¢
             // Exponentially larger steps back
             for (int i = 0; pindex && i < nStep; i++)
                 pindex = pindex->pprev;
             if (vHave.size() > 10)
                 nStep *= 2;
         }
-        vHave.push_back(hashGenesisBlock); // Ä¬ÈÏ·ÅÖÃÒ»¸ö´´ÊÀÇø¿é
+        vHave.push_back(hashGenesisBlock); // é»˜è®¤æ”¾ç½®ä¸€ä¸ªåˆ›ä¸–åŒºå—
     }
-	// ÕÒµ½±¾µØÓĞµÄÇÒÔÚÖ÷Á´ÉÏµÄ¿éµÄË÷Òı
+	// æ‰¾åˆ°æœ¬åœ°æœ‰çš„ä¸”åœ¨ä¸»é“¾ä¸Šçš„å—çš„ç´¢å¼•
     CBlockIndex* GetBlockIndex()
     {
         // Find the first block the caller has in the main chain
         foreach(const uint256& hash, vHave)
         {
-			// ÕÒµ½±¾µØÓĞµÄÇÒÔÚÖ÷Á´ÉÏµÄ
+			// æ‰¾åˆ°æœ¬åœ°æœ‰çš„ä¸”åœ¨ä¸»é“¾ä¸Šçš„
             map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hash);
             if (mi != mapBlockIndex.end())
             {
